@@ -1,0 +1,1 @@
+The Database-Connector project provides a user-friendly JavaFX application for connecting to a MySQL database. It allows users to perform CRUD (Create, Read, Update, Delete) operations on the database.
