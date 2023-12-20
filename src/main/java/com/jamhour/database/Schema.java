@@ -1,5 +1,6 @@
 package com.jamhour.database;
 
+import com.jamhour.data.EnrollmentStatus;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
