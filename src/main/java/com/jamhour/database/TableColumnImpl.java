@@ -10,9 +10,15 @@ public class TableColumnImpl<T> implements TableColumn<T> {
     private final boolean isPrimaryKey;
     private final boolean isNullable;
 
-    public static <T> TableColumnImpl<T> of(String name, Class<T> type) {
-        return new TableColumnImpl<>(name, type, false, false);
+
+    public static <T> TableColumnImpl<T> of(String name, Class<T> type, boolean isPrimaryKey) {
+        return new TableColumnImpl<>(name, type, isPrimaryKey, false);
     }
+
+    public static <T> TableColumnImpl<T> of(String name, Class<T> type) {
+        return TableColumnImpl.of(name, type, false);
+    }
+
 
     public String name() {
         return name;
