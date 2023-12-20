@@ -20,7 +20,41 @@ public class StudentQueries {
 
         final String query = "SELECT * FROM students WHERE id = ?";
         try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(query)) {
+
             preparedStatement.setInt(1, id);
+
+            var resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+                return Optional.empty();
+            }
+
+            return Optional.of(
+                    new Student(
+                            resultSet.getString("name"),
+                            resultSet.getString("email"),
+                            resultSet.getString("phone"),
+                            resultSet.getInt("id")
+                    )
+            );
+
+        } catch (SQLException sqlException) {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<Student> getStudentByEmail(String email) {
+        var database = Database.getInstance();
+
+        if (!database.isConnected()) {
+            return Optional.empty();
+        }
+
+        final String query = "SELECT * FROM students WHERE email = '?'";
+        try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(query)) {
+
+            preparedStatement.setString(1, email);
+
             var resultSet = preparedStatement.executeQuery();
 
             if (!resultSet.next()) {
