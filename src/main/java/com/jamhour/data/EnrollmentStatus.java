@@ -1,4 +1,4 @@
-package com.jamhour.database;
+package com.jamhour.data;
 
 import lombok.Getter;
 
