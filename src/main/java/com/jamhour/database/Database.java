@@ -78,5 +78,6 @@ public class Database implements AutoCloseable {
         if (connection != null) {
             connection.close();
         }
+        connected = false;
     }
 }
