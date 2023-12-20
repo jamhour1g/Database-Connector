@@ -34,13 +34,13 @@ public class Database implements AutoCloseable {
     private void createTables() {
         String createTeacherTable = """
                 CREATE TABLE IF NOT EXISTS EducationDB.teacher (
-                    id int NOT NULL AUTO_INCREMENT,
+                    id INT NOT NULL AUTO_INCREMENT,
                     date_of_birth DATE NOT NULL,
                     name VARCHAR(50)  NOT NULL,
                     email VARCHAR(30) NOT NULL,
                     phone VARCHAR(10) NOT NULL,
-                    salary double NOT NULL,
-                    experience int NOT NULL,
+                    salary DOUBLE NOT NULL,
+                    experience INT NOT NULL,
                     major VARCHAR(30) NOT NULL,
                     PRIMARY KEY (id)
                 )
@@ -48,7 +48,7 @@ public class Database implements AutoCloseable {
 
         String createStudentTable = """
                 CREATE TABLE IF NOT EXISTS EducationDB.student (
-                    id int NOT NULL AUTO_INCREMENT,
+                    id INT NOT NULL AUTO_INCREMENT,
                     name VARCHAR(50) NOT NULL,
                     email VARCHAR(30) NOT NULL,
                     phone VARCHAR(10) NOT NULL,
@@ -58,9 +58,9 @@ public class Database implements AutoCloseable {
 
         String createCourseTable = """
                 CREATE TABLE IF NOT EXISTS EducationDB.course (
-                    id int NOT NULL,
+                    id INT NOT NULL,
                     name VARCHAR(20) NOT NULL,
-                    teacher_id int DEFAULT NULL,
+                    teacher_id INT DEFAULT NULL,
                     PRIMARY KEY(id),
                     KEY FK_TEACHER_ID (teacher_id),
                     CONSTRAINT FK_TEACHER_ID FOREIGN KEY (teacher_id)
@@ -70,30 +70,30 @@ public class Database implements AutoCloseable {
 
         String createExamTable = """
                 CREATE TABLE IF NOT EXISTS EducationDB.exam (
-                 id int NOT NULL,
+                 id INT NOT NULL,
+                 course_id INT NOT NULL,
                  name VARCHAR(50) NOT NULL,
                  date_time DATETIME NOT NULL,
                  description TEXT,
-                 PRIMARY KEY (id)
+                 PRIMARY KEY (id),
+                 KEY FK_EXAM_COURSE_ID (course_id),
+                 CONSTRAINT FK_EXAM_COURSE_ID FOREIGN KEY (course_id)
+                 REFERENCES EducationDB.course (id) ON DELETE CASCADE
                  )
                 """;
 
         String createExamResultsTable = """
                 CREATE TABLE IF NOT EXISTS EducationDB.exam_result (
-                exam_id  int,
-                student_id int,
-                course_id int,
-                grade float,
-                PRIMARY KEY (exam_id,student_id,course_id),
-                KEY FK_EXAM_ID (exam_id),
-                KEY FK_STUDENT_ID (student_id),
-                KEY FK_COURSE_ID (course_id),
-                CONSTRAINT FK_EXAM_ID FOREIGN KEY (exam_id)
+                exam_id  INT,
+                student_id INT,
+                grade DOUBLE CHECK (grade >= 0 AND grade <= 100),
+                PRIMARY KEY (exam_id,student_id),
+                KEY FK_EXAM_RESULT_ID (exam_id),
+                KEY FK_EXAM_RESULT_STUDENT_ID (student_id),
+                CONSTRAINT FK_EXAM_RESULT_ID FOREIGN KEY (exam_id)
                 REFERENCES exam (id) ON DELETE CASCADE,
-                CONSTRAINT FK_STUDENT_ID FOREIGN KEY (student_id)
-                REFERENCES student (id) ON DELETE CASCADE,
-                CONSTRAINT FK_COURSE_ID FOREIGN KEY (course_id)
-                REFERENCES course (id) ON DELETE CASCADE
+                CONSTRAINT FK_EXAM_RESULT_STUDENT_ID FOREIGN KEY (student_id)
+                REFERENCES student (id) ON DELETE CASCADE
                 )
                 """;
         String createEnrollmentTable = """
@@ -104,11 +104,11 @@ public class Database implements AutoCloseable {
                     enrollment_status VARCHAR(20)
                     CHECK (enrollment_status IN ('active', 'completed', 'dropped', 'withdrawn')),
                     PRIMARY KEY (student_id, course_id),
-                    KEY FK_STUDENTID (student_id),
-                    KEY FK_COURSEID (course_id),
-                    CONSTRAINT FK_STUDENTID FOREIGN KEY (student_id)
+                    KEY FK_ENROLLED_STUDENT_ID (student_id),
+                    KEY FK_ENROLLED_COURSE_ID (course_id),
+                    CONSTRAINT FK_STUDENT_ID FOREIGN KEY (student_id)
                     REFERENCES student (id) ON DELETE CASCADE,
-                    CONSTRAINT FK_COURSEID FOREIGN KEY (course_id)
+                    CONSTRAINT FK_COURSE_ID FOREIGN KEY (course_id)
                     REFERENCES course (id) ON DELETE CASCADE
                 )
                 """;
