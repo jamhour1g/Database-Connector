@@ -2,8 +2,8 @@ package com.jamhour.database;
 
 public interface TableColumn<T> {
 
-    String getName();
-    T getType();
+    String name();
+    Class<T> getType();
 
     boolean isPrimaryKey();
     boolean isNullable();
