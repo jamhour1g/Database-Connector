@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 @Getter
-class Database implements AutoCloseable {
+public class Database implements AutoCloseable {
     private static Database instance;
 
     private final MysqlDataSource dataSource = new MysqlDataSource();
