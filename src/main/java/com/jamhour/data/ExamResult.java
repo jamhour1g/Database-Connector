@@ -11,12 +11,12 @@ import java.util.Map;
 
 public record ExamResult(double grade, int examId, int studentId) implements Comparable<ExamResult>, Table {
 
+    public static final String TABLE_NAME = "exam_result";
     private static final Comparator<ExamResult> COMPARATOR =
             Comparator
                     .comparingInt(ExamResult::examId)
                     .thenComparingInt(ExamResult::studentId)
                     .thenComparingDouble(ExamResult::grade);
-    private static final String TABLE_NAME = "exam_result";
 
     @Override
     public Map<TableColumn<?>, String> getTableColumns() {

@@ -12,7 +12,7 @@ import java.util.Map;
 
 public record Exam(String name, String description, LocalDateTime examDateTime, int id,
                    int courseId) implements Comparable<Exam>, Table {
-
+    public static final String TABLE_NAME = "exam";
     private static final Comparator<Exam> COMPARATOR =
             Comparator
                     .comparingInt(Exam::id)
@@ -20,7 +20,6 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
                     .thenComparing(Exam::examDateTime)
                     .thenComparing(Exam::name)
                     .thenComparing(Exam::description);
-    private static final String TABLE_NAME = "exam";
 
     @Override
     public int compareTo(Exam o) {

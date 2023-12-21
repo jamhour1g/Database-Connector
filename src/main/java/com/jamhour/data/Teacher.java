@@ -12,6 +12,7 @@ import java.util.Map;
 
 public record Teacher(String name, String phone, String email, String major, double salary, int experience,
                       LocalDate dateOfBirth, int id) implements Comparable<Teacher>, Table {
+    public static final String TABLE_NAME = "teacher";
     private static final Comparator<Teacher> COMPARATOR =
             Comparator
                     .comparing(Teacher::id)
@@ -21,7 +22,6 @@ public record Teacher(String name, String phone, String email, String major, dou
                     .thenComparing(Teacher::name)
                     .thenComparing(Teacher::experience)
                     .thenComparing(Teacher::salary);
-    public static final String TABLE_NAME = "teacher";
 
     @Override
     public Map<TableColumn<?>, String> getTableColumns() {

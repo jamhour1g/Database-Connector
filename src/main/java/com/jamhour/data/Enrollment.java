@@ -13,6 +13,7 @@ public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, i
         implements Comparable<Enrollment>, Table {
 
 
+    public static final String TABLE_NAME = "enrollment";
     private static final Comparator<Enrollment> COMPARATOR =
             Comparator
                     .comparingInt(Enrollment::studentId)
@@ -20,7 +21,6 @@ public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, i
                     .thenComparing(Enrollment::payed)
                     .thenComparing(Enrollment::status);
 
-    private static final String TABLE_NAME = "enrollment";
 
     @Override
     public Map<TableColumn<?>, String> getTableColumns() {

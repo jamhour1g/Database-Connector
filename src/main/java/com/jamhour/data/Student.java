@@ -11,7 +11,7 @@ import java.util.Map;
 
 public record Student(String name, String email, String phone, int id) implements Comparable<Student>, Table {
 
-    private static final String TABLE_NAME = "student";
+    public static final String TABLE_NAME = "student";
     private static final Comparator<Student> COMPARATOR =
             Comparator
                     .comparingInt(Student::id)

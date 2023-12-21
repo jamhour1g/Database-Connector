@@ -11,12 +11,12 @@ import java.util.Map;
 
 public record Course(String name, int id, int teacherId) implements Comparable<Course>, Table {
 
+    public static final String TABLE_NAME = "course";
     private static final Comparator<Course> COMPARATOR =
             Comparator
                     .comparingInt(Course::id)
                     .thenComparing(Course::teacherId)
                     .thenComparing(Course::name);
-    private static final String TABLE_NAME = "course";
 
 
     @Override
