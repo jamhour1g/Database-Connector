@@ -1,6 +1,6 @@
 package com.jamhour.database;
 
-import com.jamhour.data.EnrollmentStatus;
+import com.jamhour.data.Enrollment;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -18,9 +18,11 @@ public enum Schema {
     static String getSchemaCreationQuery() {
         return STR."CREATE DATABASE IF NOT EXISTS \{Schema.NAME}";
     }
+
     static String useSchema() {
         return STR."USE \{Schema.NAME}";
     }
+
     @Getter
     public enum Tables {
         TEACHER("teacher"),
@@ -90,7 +92,7 @@ public enum Schema {
                         new Column("student_id", Integer.class),
                         new Column("course_id", Integer.class),
                         new Column("has_paid", Boolean.class),
-                        new Column("enrollment_status", EnrollmentStatus.class)
+                        new Column("enrollment_status", Enrollment.EnrollmentStatus.class)
                 );
             };
         }
