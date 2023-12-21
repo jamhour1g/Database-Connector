@@ -52,7 +52,7 @@ public record Student(String name, String email, String phone, int id) implement
 
     @Getter
     @RequiredArgsConstructor
-    public enum StudentColumn {
+    public enum Column {
 
         ID(Student.ID_TABLE_COLUMN),
         NAME(Student.NAME_TABLE_COLUMN),
@@ -60,6 +60,14 @@ public record Student(String name, String email, String phone, int id) implement
         PHONE(Student.PHONE_TABLE_COLUMN);
 
         private final TableColumn<?> tableColumn;
+
+        public Class<?> getType() {
+            return tableColumn.getType();
+        }
+
+        public String getName() {
+            return tableColumn.name();
+        }
 
     }
 }

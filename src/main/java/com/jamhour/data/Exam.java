@@ -55,7 +55,7 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
 
     @Getter
     @RequiredArgsConstructor
-    public enum ExamColumn {
+    public enum Column {
         ID(Exam.EXAM_ID),
         COURSE_ID(Exam.COURSE_ID),
         NAME(Exam.EXAM_NAME),
@@ -63,5 +63,13 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
         DATE_TIME(Exam.EXAM_DATE_TIME);
 
         private final TableColumn<?> tableColumn;
+
+        public Class<?> getType() {
+            return tableColumn.getType();
+        }
+
+        public String getName() {
+            return tableColumn.name();
+        }
     }
 }

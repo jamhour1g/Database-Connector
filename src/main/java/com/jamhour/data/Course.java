@@ -48,11 +48,19 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
 
     @Getter
     @RequiredArgsConstructor
-    public enum CourseColumn {
+    public enum Column {
         ID(Course.COURSE_ID),
         TEACHER_ID(Course.TEACHER_ID),
         NAME(Course.COURSE_NAME);
 
         private final TableColumn<?> tableColumn;
+
+        public Class<?> getType() {
+            return tableColumn.getType();
+        }
+
+        public String getName() {
+            return tableColumn.name();
+        }
     }
 }
