@@ -13,45 +13,22 @@ public class StudentQueries {
 
     private static final Database database = Database.getInstance();
 
-    public static Optional<Student> getStudentById(int id) {
+    public static <T> Optional<Student> getStudentBy(T thingToGetStudentBy, Student.Column columnToGetStudentBy) {
 
         if (!database.isConnected()) {
             return Optional.empty();
         }
 
-        final String query = "SELECT * FROM students WHERE id = ?";
+        final String query = STR."SELECT * FROM \{Student.TABLE_NAME} WHERE \{columnToGetStudentBy.getName()} = ?";
         try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(query)) {
 
-            preparedStatement.setInt(1, id);
-
-            var resultSet = preparedStatement.executeQuery();
-
-            if (!resultSet.next()) {
-                return Optional.empty();
+            switch (columnToGetStudentBy) {
+                case Student.Column.ID -> preparedStatement.setInt(1, (int) thingToGetStudentBy);
+                case Student.Column.NAME,
+                        Student.Column.EMAIL,
+                        Student.Column.PHONE -> preparedStatement.setString(1, (String) thingToGetStudentBy);
             }
-            return Optional.of(
-                    new Student(
-                            resultSet.getString("name"),
-                            resultSet.getString("email"),
-                            resultSet.getString("phone"),
-                            resultSet.getInt("id")
-                    )
-            );
 
-        } catch (SQLException sqlException) {
-            return Optional.empty();
-        }
-    }
-
-    public static Optional<Student> getStudentByName(String name) {
-        if (!database.isConnected()) {
-            return Optional.empty();
-        }
-
-        final String query = "SELECT * FROM students WHERE name = '?'";
-        try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(query)) {
-
-            preparedStatement.setString(1, name);
 
             var resultSet = preparedStatement.executeQuery();
 
@@ -61,48 +38,17 @@ public class StudentQueries {
 
             return Optional.of(
                     new Student(
-                            resultSet.getString("name"),
-                            resultSet.getString("email"),
-                            resultSet.getString("phone"),
-                            resultSet.getInt("id")
+                            resultSet.getString(Student.Column.NAME.getName()),
+                            resultSet.getString(Student.Column.EMAIL.getName()),
+                            resultSet.getString(Student.Column.PHONE.getName()),
+                            resultSet.getInt(Student.Column.ID.getName())
                     )
             );
 
         } catch (SQLException sqlException) {
+            System.err.println(STR."Could not get student from table \{columnToGetStudentBy.getName()} using \{thingToGetStudentBy}: \{sqlException.getMessage()}");
             return Optional.empty();
         }
     }
-
-    public static Optional<Student> getStudentByEmail(String email) {
-
-        if (!database.isConnected()) {
-            return Optional.empty();
-        }
-
-        final String query = "SELECT * FROM students WHERE email = '?'";
-        try (PreparedStatement preparedStatement = database.getConnection().prepareStatement(query)) {
-
-            preparedStatement.setString(1, email);
-
-            var resultSet = preparedStatement.executeQuery();
-
-            if (!resultSet.next()) {
-                return Optional.empty();
-            }
-
-            return Optional.of(
-                    new Student(
-                            resultSet.getString("name"),
-                            resultSet.getString("email"),
-                            resultSet.getString("phone"),
-                            resultSet.getInt("id")
-                    )
-            );
-
-        } catch (SQLException sqlException) {
-            return Optional.empty();
-        }
-    }
-
 
 }
