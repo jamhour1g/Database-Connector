@@ -9,20 +9,14 @@ import lombok.RequiredArgsConstructor;
 import java.util.Comparator;
 import java.util.Map;
 
-public record Course(String name, int id, int teacherId) implements Comparable<Course>, Table {
+public record ExamResult(double grade, int examId, int studentId) implements Comparable<ExamResult>, Table {
 
-    private static final Comparator<Course> COMPARATOR =
+    private static final Comparator<ExamResult> COMPARATOR =
             Comparator
-                    .comparingInt(Course::id)
-                    .thenComparing(Course::teacherId)
-                    .thenComparing(Course::name);
-    private static final String TABLE_NAME = "course";
-
-
-    @Override
-    public int compareTo(Course other) {
-        return COMPARATOR.compare(this, other);
-    }
+                    .comparingInt(ExamResult::examId)
+                    .thenComparingInt(ExamResult::studentId)
+                    .thenComparingDouble(ExamResult::grade);
+    private static final String TABLE_NAME = "exam_result";
 
     @Override
     public Map<TableColumn<?>, String> getTableColumns() {
@@ -36,15 +30,20 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
 
     @Override
     public int getPrimaryKey() {
-        return id();
+        return examId();
+    }
+
+    @Override
+    public int compareTo(ExamResult other) {
+        return COMPARATOR.compare(this, other);
     }
 
     @Getter
     @RequiredArgsConstructor
     public enum Column {
         ID(TableColumnImpl.of("id", Integer.class, true)),
-        TEACHER_ID(TableColumnImpl.of("teacher_id", Integer.class)),
-        NAME(TableColumnImpl.of("name", String.class));
+        GRADE(TableColumnImpl.of("grade", Integer.class)),
+        EXAM_ID(TableColumnImpl.of("exam_id", Integer.class));
 
         private final TableColumn<?> tableColumn;
 
@@ -75,8 +74,8 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
         private static Map<TableColumn<?>, String> toMap() {
             return Map.ofEntries(
                     Column.ID.toEntry(),
-                    Column.TEACHER_ID.toEntry(),
-                    Column.NAME.toEntry()
+                    Column.GRADE.toEntry(),
+                    Column.EXAM_ID.toEntry()
             );
         }
     }

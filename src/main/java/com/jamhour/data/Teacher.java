@@ -6,19 +6,22 @@ import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Map;
 
-public record Student(String name, String email, String phone, int id) implements Comparable<Student>, Table {
-
-    private static final String TABLE_NAME = "student";
-    private static final Comparator<Student> COMPARATOR =
+public record Teacher(String name, String phone, String email, String major, double salary, int experience,
+                      LocalDate dateOfBirth, int id) implements Comparable<Teacher>, Table {
+    private static final Comparator<Teacher> COMPARATOR =
             Comparator
-                    .comparingInt(Student::id)
-                    .thenComparing(Student::phone)
-                    .thenComparing(Student::name)
-                    .thenComparing(Student::email);
-
+                    .comparing(Teacher::id)
+                    .thenComparing(Teacher::phone)
+                    .thenComparing(Teacher::email)
+                    .thenComparing(Teacher::dateOfBirth)
+                    .thenComparing(Teacher::name)
+                    .thenComparing(Teacher::experience)
+                    .thenComparing(Teacher::salary);
+    public static final String TABLE_NAME = "teacher";
 
     @Override
     public Map<TableColumn<?>, String> getTableColumns() {
@@ -36,7 +39,7 @@ public record Student(String name, String email, String phone, int id) implement
     }
 
     @Override
-    public int compareTo(Student other) {
+    public int compareTo(Teacher other) {
         return COMPARATOR.compare(this, other);
     }
 
@@ -44,10 +47,14 @@ public record Student(String name, String email, String phone, int id) implement
     @RequiredArgsConstructor
     public enum Column {
 
-        ID(TableColumnImpl.of("id", Integer.class, true)),
         NAME(TableColumnImpl.of("name", String.class)),
+        PHONE(TableColumnImpl.of("phone", String.class)),
         EMAIL(TableColumnImpl.of("email", String.class)),
-        PHONE(TableColumnImpl.of("phone", String.class));
+        MAJOR(TableColumnImpl.of("major", String.class)),
+        SALARY(TableColumnImpl.of("salary", Double.class)),
+        EXPERIENCE(TableColumnImpl.of("experience", Integer.class)),
+        DATE_OF_BIRTH(TableColumnImpl.of("date_of_birth", LocalDate.class)),
+        ID(TableColumnImpl.of("id", Integer.class, true));
 
         private final TableColumn<?> tableColumn;
 
@@ -77,10 +84,14 @@ public record Student(String name, String email, String phone, int id) implement
 
         private static Map<TableColumn<?>, String> toMap() {
             return Map.ofEntries(
-                    Column.ID.toEntry(),
                     Column.NAME.toEntry(),
+                    Column.PHONE.toEntry(),
                     Column.EMAIL.toEntry(),
-                    Column.PHONE.toEntry()
+                    Column.MAJOR.toEntry(),
+                    Column.SALARY.toEntry(),
+                    Column.EXPERIENCE.toEntry(),
+                    Column.DATE_OF_BIRTH.toEntry(),
+                    Column.ID.toEntry()
             );
         }
     }

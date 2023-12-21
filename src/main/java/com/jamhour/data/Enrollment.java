@@ -9,16 +9,18 @@ import lombok.RequiredArgsConstructor;
 import java.util.Comparator;
 import java.util.Map;
 
-public record Student(String name, String email, String phone, int id) implements Comparable<Student>, Table {
+public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, int studentId)
+        implements Comparable<Enrollment>, Table {
 
-    private static final String TABLE_NAME = "student";
-    private static final Comparator<Student> COMPARATOR =
+
+    private static final Comparator<Enrollment> COMPARATOR =
             Comparator
-                    .comparingInt(Student::id)
-                    .thenComparing(Student::phone)
-                    .thenComparing(Student::name)
-                    .thenComparing(Student::email);
+                    .comparingInt(Enrollment::studentId)
+                    .thenComparingInt(Enrollment::courseId)
+                    .thenComparing(Enrollment::payed)
+                    .thenComparing(Enrollment::status);
 
+    private static final String TABLE_NAME = "enrollment";
 
     @Override
     public Map<TableColumn<?>, String> getTableColumns() {
@@ -32,22 +34,35 @@ public record Student(String name, String email, String phone, int id) implement
 
     @Override
     public int getPrimaryKey() {
-        return id();
+        return studentId;
     }
 
     @Override
-    public int compareTo(Student other) {
+    public int compareTo(Enrollment other) {
         return COMPARATOR.compare(this, other);
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    public enum EnrollmentStatus {
+
+        ACTIVE("active"),
+        COMPLETED("completed"),
+        DROPPED("dropped"),
+        WITHDRAWN("withdrawn");
+
+        private final String status;
+
     }
 
     @Getter
     @RequiredArgsConstructor
     public enum Column {
 
-        ID(TableColumnImpl.of("id", Integer.class, true)),
-        NAME(TableColumnImpl.of("name", String.class)),
-        EMAIL(TableColumnImpl.of("email", String.class)),
-        PHONE(TableColumnImpl.of("phone", String.class));
+        STATUS(TableColumnImpl.of("status", EnrollmentStatus.class)),
+        PAYED(TableColumnImpl.of("payed", Boolean.class)),
+        COURSE_ID(TableColumnImpl.of("course_id", Integer.class, true)),
+        STUDENT_ID(TableColumnImpl.of("student_id", Integer.class, true));
 
         private final TableColumn<?> tableColumn;
 
@@ -77,10 +92,10 @@ public record Student(String name, String email, String phone, int id) implement
 
         private static Map<TableColumn<?>, String> toMap() {
             return Map.ofEntries(
-                    Column.ID.toEntry(),
-                    Column.NAME.toEntry(),
-                    Column.EMAIL.toEntry(),
-                    Column.PHONE.toEntry()
+                    Column.STATUS.toEntry(),
+                    Column.PAYED.toEntry(),
+                    Column.COURSE_ID.toEntry(),
+                    Column.STUDENT_ID.toEntry()
             );
         }
     }

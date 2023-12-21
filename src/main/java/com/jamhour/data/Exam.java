@@ -6,22 +6,25 @@ import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Map;
 
-public record Course(String name, int id, int teacherId) implements Comparable<Course>, Table {
+public record Exam(String name, String description, LocalDateTime examDateTime, int id,
+                   int courseId) implements Comparable<Exam>, Table {
 
-    private static final Comparator<Course> COMPARATOR =
+    private static final Comparator<Exam> COMPARATOR =
             Comparator
-                    .comparingInt(Course::id)
-                    .thenComparing(Course::teacherId)
-                    .thenComparing(Course::name);
-    private static final String TABLE_NAME = "course";
-
+                    .comparingInt(Exam::id)
+                    .thenComparing(Exam::courseId)
+                    .thenComparing(Exam::examDateTime)
+                    .thenComparing(Exam::name)
+                    .thenComparing(Exam::description);
+    private static final String TABLE_NAME = "exam";
 
     @Override
-    public int compareTo(Course other) {
-        return COMPARATOR.compare(this, other);
+    public int compareTo(Exam o) {
+        return COMPARATOR.compare(this, o);
     }
 
     @Override
@@ -43,8 +46,10 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
     @RequiredArgsConstructor
     public enum Column {
         ID(TableColumnImpl.of("id", Integer.class, true)),
-        TEACHER_ID(TableColumnImpl.of("teacher_id", Integer.class)),
-        NAME(TableColumnImpl.of("name", String.class));
+        COURSE_ID(TableColumnImpl.of("course_id", Integer.class)),
+        NAME(TableColumnImpl.of("name", String.class)),
+        DESCRIPTION(TableColumnImpl.of("description", String.class)),
+        EXAM_DATE_TIME(TableColumnImpl.of("exam_date_time", LocalDateTime.class));
 
         private final TableColumn<?> tableColumn;
 
@@ -75,8 +80,10 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
         private static Map<TableColumn<?>, String> toMap() {
             return Map.ofEntries(
                     Column.ID.toEntry(),
-                    Column.TEACHER_ID.toEntry(),
-                    Column.NAME.toEntry()
+                    Column.COURSE_ID.toEntry(),
+                    Column.NAME.toEntry(),
+                    Column.DESCRIPTION.toEntry(),
+                    Column.EXAM_DATE_TIME.toEntry()
             );
         }
     }
