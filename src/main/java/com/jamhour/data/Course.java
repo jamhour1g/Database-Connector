@@ -1,5 +1,6 @@
 package com.jamhour.data;
 
+import com.jamhour.database.Schema;
 import com.jamhour.database.Table;
 import com.jamhour.database.TableColumn;
 import com.jamhour.database.TableColumnImpl;
@@ -11,7 +12,7 @@ import java.util.Map;
 
 public record Course(String name, int id, int teacherId) implements Comparable<Course>, Table {
 
-    public static final String TABLE_NAME = "course";
+    public static final String TABLE_NAME = Schema.Tables.COURSE.getTableName();
     private static final Comparator<Course> COMPARATOR =
             Comparator
                     .comparingInt(Course::id)
