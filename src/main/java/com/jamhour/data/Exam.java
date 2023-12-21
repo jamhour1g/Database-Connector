@@ -3,6 +3,8 @@ package com.jamhour.data;
 import com.jamhour.database.Table;
 import com.jamhour.database.TableColumn;
 import com.jamhour.database.TableColumnImpl;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -49,5 +51,17 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
     @Override
     public int getPrimaryKey() {
         return id();
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    public enum ExamColumn {
+        ID(Exam.EXAM_ID),
+        COURSE_ID(Exam.COURSE_ID),
+        NAME(Exam.EXAM_NAME),
+        DESCRIPTION(Exam.EXAM_DESCRIPTION),
+        DATE_TIME(Exam.EXAM_DATE_TIME);
+
+        private final TableColumn<?> tableColumn;
     }
 }

@@ -3,6 +3,8 @@ package com.jamhour.data;
 import com.jamhour.database.Table;
 import com.jamhour.database.TableColumn;
 import com.jamhour.database.TableColumnImpl;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -48,4 +50,16 @@ public record Student(String name, String email, String phone, int id) implement
         return COMPARATOR.compare(this, other);
     }
 
+    @Getter
+    @RequiredArgsConstructor
+    public enum StudentColumn {
+
+        ID(Student.ID_TABLE_COLUMN),
+        NAME(Student.NAME_TABLE_COLUMN),
+        EMAIL(Student.EMAIL_TABLE_COLUMN),
+        PHONE(Student.PHONE_TABLE_COLUMN);
+
+        private final TableColumn<?> tableColumn;
+
+    }
 }

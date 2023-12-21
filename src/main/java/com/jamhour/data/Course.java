@@ -3,6 +3,8 @@ package com.jamhour.data;
 import com.jamhour.database.Table;
 import com.jamhour.database.TableColumn;
 import com.jamhour.database.TableColumnImpl;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -42,5 +44,15 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
     @Override
     public int getPrimaryKey() {
         return id();
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    public enum CourseColumn {
+        ID(Course.COURSE_ID),
+        TEACHER_ID(Course.TEACHER_ID),
+        NAME(Course.COURSE_NAME);
+
+        private final TableColumn<?> tableColumn;
     }
 }
