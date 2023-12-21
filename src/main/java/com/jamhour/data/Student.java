@@ -12,11 +12,6 @@ import java.util.Map;
 public record Student(String name, String email, String phone, int id) implements Comparable<Student>, Table {
 
     private static final String TABLE_NAME = "student";
-
-    private static final TableColumn<Integer> ID_TABLE_COLUMN = TableColumnImpl.of("id", Integer.class, true);
-    private static final TableColumn<String> NAME_TABLE_COLUMN = TableColumnImpl.of("name", String.class);
-    private static final TableColumn<String> EMAIL_TABLE_COLUMN = TableColumnImpl.of("email", String.class);
-    private static final TableColumn<String> PHONE_TABLE_COLUMN = TableColumnImpl.of("phone", String.class);
     private static final Comparator<Student> COMPARATOR =
             Comparator
                     .comparingInt(Student::id)
@@ -27,12 +22,7 @@ public record Student(String name, String email, String phone, int id) implement
 
     @Override
     public Map<TableColumn<?>, String> getTableColumns() {
-        return Map.of(
-                ID_TABLE_COLUMN, ID_TABLE_COLUMN.name(),
-                NAME_TABLE_COLUMN, NAME_TABLE_COLUMN.name(),
-                EMAIL_TABLE_COLUMN, EMAIL_TABLE_COLUMN.name(),
-                PHONE_TABLE_COLUMN, PHONE_TABLE_COLUMN.name()
-        );
+        return Column.toMap();
     }
 
     @Override
@@ -54,12 +44,16 @@ public record Student(String name, String email, String phone, int id) implement
     @RequiredArgsConstructor
     public enum Column {
 
-        ID(Student.ID_TABLE_COLUMN),
-        NAME(Student.NAME_TABLE_COLUMN),
-        EMAIL(Student.EMAIL_TABLE_COLUMN),
-        PHONE(Student.PHONE_TABLE_COLUMN);
+        ID(TableColumnImpl.of("id", Integer.class, true)),
+        NAME(TableColumnImpl.of("name", String.class)),
+        EMAIL(TableColumnImpl.of("email", String.class)),
+        PHONE(TableColumnImpl.of("phone", String.class));
 
         private final TableColumn<?> tableColumn;
+
+        private TableColumn<?> getTableColumn() {
+            return tableColumn;
+        }
 
         public Class<?> getType() {
             return tableColumn.getType();
@@ -69,5 +63,25 @@ public record Student(String name, String email, String phone, int id) implement
             return tableColumn.name();
         }
 
+        public boolean isPrimaryKey() {
+            return tableColumn.isPrimaryKey();
+        }
+
+        public boolean isNullable() {
+            return tableColumn.isNullable();
+        }
+
+        private Map.Entry<TableColumn<?>, String> toEntry() {
+            return Map.entry(getTableColumn(), getName());
+        }
+
+        private static Map<TableColumn<?>, String> toMap() {
+            return Map.ofEntries(
+                    Column.ID.toEntry(),
+                    Column.NAME.toEntry(),
+                    Column.EMAIL.toEntry(),
+                    Column.PHONE.toEntry()
+            );
+        }
     }
 }

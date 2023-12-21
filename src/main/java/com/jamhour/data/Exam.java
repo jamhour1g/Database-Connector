@@ -20,12 +20,7 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
                     .thenComparing(Exam::examDateTime)
                     .thenComparing(Exam::name)
                     .thenComparing(Exam::description);
-
-    private static final TableColumn<Integer> EXAM_ID = TableColumnImpl.of("id", Integer.class, true);
-    private static final TableColumn<Integer> COURSE_ID = TableColumnImpl.of("course_id", Integer.class);
-    private static final TableColumn<String> EXAM_NAME = TableColumnImpl.of("name", String.class);
-    private static final TableColumn<String> EXAM_DESCRIPTION = TableColumnImpl.of("description", String.class);
-    private static final TableColumn<LocalDateTime> EXAM_DATE_TIME = TableColumnImpl.of("exam_date_time", LocalDateTime.class);
+    private static final String TABLE_NAME = "exam";
 
     @Override
     public int compareTo(Exam o) {
@@ -34,18 +29,12 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
 
     @Override
     public Map<TableColumn<?>, String> getTableColumns() {
-        return Map.of(
-                EXAM_ID, EXAM_ID.name(),
-                COURSE_ID, COURSE_ID.name(),
-                EXAM_NAME, EXAM_NAME.name(),
-                EXAM_DESCRIPTION, EXAM_DESCRIPTION.name(),
-                EXAM_DATE_TIME, EXAM_DATE_TIME.name()
-        );
+        return Column.toMap();
     }
 
     @Override
     public String getTableName() {
-        return "exam";
+        return TABLE_NAME;
     }
 
     @Override
@@ -56,13 +45,17 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
     @Getter
     @RequiredArgsConstructor
     public enum Column {
-        ID(Exam.EXAM_ID),
-        COURSE_ID(Exam.COURSE_ID),
-        NAME(Exam.EXAM_NAME),
-        DESCRIPTION(Exam.EXAM_DESCRIPTION),
-        DATE_TIME(Exam.EXAM_DATE_TIME);
+        ID(TableColumnImpl.of("id", Integer.class, true)),
+        COURSE_ID(TableColumnImpl.of("course_id", Integer.class)),
+        NAME(TableColumnImpl.of("name", String.class)),
+        DESCRIPTION(TableColumnImpl.of("description", String.class)),
+        EXAM_DATE_TIME(TableColumnImpl.of("exam_date_time", LocalDateTime.class));
 
         private final TableColumn<?> tableColumn;
+
+        private TableColumn<?> getTableColumn() {
+            return tableColumn;
+        }
 
         public Class<?> getType() {
             return tableColumn.getType();
@@ -70,6 +63,28 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
 
         public String getName() {
             return tableColumn.name();
+        }
+
+        public boolean isPrimaryKey() {
+            return tableColumn.isPrimaryKey();
+        }
+
+        public boolean isNullable() {
+            return tableColumn.isNullable();
+        }
+
+        private Map.Entry<TableColumn<?>, String> toEntry() {
+            return Map.entry(getTableColumn(), getName());
+        }
+
+        private static Map<TableColumn<?>, String> toMap() {
+            return Map.ofEntries(
+                    Column.ID.toEntry(),
+                    Column.COURSE_ID.toEntry(),
+                    Column.NAME.toEntry(),
+                    Column.DESCRIPTION.toEntry(),
+                    Column.EXAM_DATE_TIME.toEntry()
+            );
         }
     }
 }

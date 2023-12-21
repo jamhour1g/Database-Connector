@@ -11,15 +11,12 @@ import java.util.Map;
 
 public record Course(String name, int id, int teacherId) implements Comparable<Course>, Table {
 
-    private static final TableColumn<Integer> COURSE_ID = TableColumnImpl.of("id", Integer.class, true);
-    private static final TableColumn<Integer> TEACHER_ID = TableColumnImpl.of("teacher_id", Integer.class);
-    private static final TableColumn<String> COURSE_NAME = TableColumnImpl.of("name", String.class);
-
     private static final Comparator<Course> COMPARATOR =
             Comparator
                     .comparingInt(Course::id)
                     .thenComparing(Course::teacherId)
                     .thenComparing(Course::name);
+    private static final String TABLE_NAME = "course";
 
 
     @Override
@@ -29,16 +26,12 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
 
     @Override
     public Map<TableColumn<?>, String> getTableColumns() {
-        return Map.of(
-                COURSE_ID, COURSE_ID.name(),
-                TEACHER_ID, TEACHER_ID.name(),
-                COURSE_NAME, COURSE_NAME.name()
-        );
+        return Column.toMap();
     }
 
     @Override
     public String getTableName() {
-        return "course";
+        return TABLE_NAME;
     }
 
     @Override
@@ -49,11 +42,15 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
     @Getter
     @RequiredArgsConstructor
     public enum Column {
-        ID(Course.COURSE_ID),
-        TEACHER_ID(Course.TEACHER_ID),
-        NAME(Course.COURSE_NAME);
+        ID(TableColumnImpl.of("id", Integer.class, true)),
+        TEACHER_ID(TableColumnImpl.of("teacher_id", Integer.class)),
+        NAME(TableColumnImpl.of("name", String.class));
 
         private final TableColumn<?> tableColumn;
+
+        private TableColumn<?> getTableColumn() {
+            return tableColumn;
+        }
 
         public Class<?> getType() {
             return tableColumn.getType();
@@ -61,6 +58,26 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
 
         public String getName() {
             return tableColumn.name();
+        }
+
+        public boolean isPrimaryKey() {
+            return tableColumn.isPrimaryKey();
+        }
+
+        public boolean isNullable() {
+            return tableColumn.isNullable();
+        }
+
+        private Map.Entry<TableColumn<?>, String> toEntry() {
+            return Map.entry(getTableColumn(), getName());
+        }
+
+        private static Map<TableColumn<?>, String> toMap() {
+            return Map.ofEntries(
+                    Column.ID.toEntry(),
+                    Column.TEACHER_ID.toEntry(),
+                    Column.NAME.toEntry()
+            );
         }
     }
 }

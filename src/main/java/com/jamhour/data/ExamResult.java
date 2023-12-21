@@ -16,19 +16,16 @@ public record ExamResult(double grade, int examId, int studentId) implements Com
                     .comparingInt(ExamResult::examId)
                     .thenComparingInt(ExamResult::studentId)
                     .thenComparingDouble(ExamResult::grade);
+    private static final String TABLE_NAME = "exam_result";
 
     @Override
     public Map<TableColumn<?>, String> getTableColumns() {
-        return Map.of(
-                Column.ID.getTableColumn(), Column.ID.getName(),
-                Column.GRADE.getTableColumn(), Column.GRADE.getName(),
-                Column.EXAM_ID.getTableColumn(), Column.EXAM_ID.getName()
-        );
+        return Column.toMap();
     }
 
     @Override
     public String getTableName() {
-        return "exam_result";
+        return TABLE_NAME;
     }
 
     @Override
@@ -44,7 +41,7 @@ public record ExamResult(double grade, int examId, int studentId) implements Com
     @Getter
     @RequiredArgsConstructor
     public enum Column {
-        ID(TableColumnImpl.of("id", Integer.class)),
+        ID(TableColumnImpl.of("id", Integer.class, true)),
         GRADE(TableColumnImpl.of("grade", Integer.class)),
         EXAM_ID(TableColumnImpl.of("exam_id", Integer.class));
 
@@ -60,6 +57,26 @@ public record ExamResult(double grade, int examId, int studentId) implements Com
 
         public String getName() {
             return tableColumn.name();
+        }
+
+        public boolean isPrimaryKey() {
+            return tableColumn.isPrimaryKey();
+        }
+
+        public boolean isNullable() {
+            return tableColumn.isNullable();
+        }
+
+        private Map.Entry<TableColumn<?>, String> toEntry() {
+            return Map.entry(getTableColumn(), getName());
+        }
+
+        private static Map<TableColumn<?>, String> toMap() {
+            return Map.ofEntries(
+                    Column.ID.toEntry(),
+                    Column.GRADE.toEntry(),
+                    Column.EXAM_ID.toEntry()
+            );
         }
     }
 }
