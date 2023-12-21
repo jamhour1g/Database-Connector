@@ -11,7 +11,7 @@ public record Student(String name, String email, String phone, int id) implement
 
     private static final String TABLE_NAME = "student";
 
-    private static final TableColumn<Integer> ID_TABLE_COLUMN = TableColumnImpl.of("id", Integer.class);
+    private static final TableColumn<Integer> ID_TABLE_COLUMN = TableColumnImpl.of("id", Integer.class, true);
     private static final TableColumn<String> NAME_TABLE_COLUMN = TableColumnImpl.of("name", String.class);
     private static final TableColumn<String> EMAIL_TABLE_COLUMN = TableColumnImpl.of("email", String.class);
     private static final TableColumn<String> PHONE_TABLE_COLUMN = TableColumnImpl.of("phone", String.class);
