@@ -1,12 +1,7 @@
 package com.jamhour.database;
 
-import com.jamhour.data.Enrollment;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
@@ -33,12 +28,9 @@ public enum Schema {
         EXAM_RESULT("exam_result");
 
         private final String tableName;
-        private final List<Column> columns;
 
         Tables(String tableName) {
             this.tableName = tableName;
-            this.columns = getColumns();
-
         }
 
         String getCreateTableQuery() {
@@ -49,51 +41,6 @@ public enum Schema {
                 case EXAM -> getExamTableCreationQuery();
                 case EXAM_RESULT -> getExamResultTableCreationQuery();
                 case ENROLLMENT -> getEnrollmentTableCreationQuery();
-            };
-        }
-
-        public List<Column> getColumns() {
-            return switch (this) {
-                case TEACHER -> List.of(
-                        new Column("id", Integer.class),
-                        new Column("date_of_birth", LocalDate.class),
-                        new Column("name", String.class),
-                        new Column("email", String.class),
-                        new Column("phone", String.class),
-                        new Column("salary", Double.class),
-                        new Column("experience", Integer.class),
-                        new Column("major", String.class)
-
-                );
-                case STUDENT -> List.of(
-                        new Column("id", Integer.class),
-                        new Column("name", String.class),
-                        new Column("email", String.class),
-                        new Column("phone", String.class)
-                );
-                case COURSE -> List.of(
-                        new Column("id", Integer.class),
-                        new Column("name", String.class),
-                        new Column("teacher_id", Integer.class)
-                );
-                case EXAM -> List.of(
-                        new Column("id", Integer.class),
-                        new Column("course_id", Integer.class),
-                        new Column("name", String.class),
-                        new Column("date_time", LocalDateTime.class),
-                        new Column("description", String.class)
-                );
-                case EXAM_RESULT -> List.of(
-                        new Column("exam_id", Integer.class),
-                        new Column("student_id", Integer.class),
-                        new Column("grade", Double.class)
-                );
-                case ENROLLMENT -> List.of(
-                        new Column("student_id", Integer.class),
-                        new Column("course_id", Integer.class),
-                        new Column("has_paid", Boolean.class),
-                        new Column("enrollment_status", Enrollment.EnrollmentStatus.class)
-                );
             };
         }
 
@@ -152,8 +99,8 @@ public enum Schema {
         private static String getCourseTableCreationQuery() {
             return STR."""
                 CREATE TABLE IF NOT EXISTS \{NAME}.\{COURSE.getTableName()} (
-                    id INT NOT NULL,
-                    name VARCHAR(20) NOT NULL,
+                    id INT NOT NULL AUTO_INCREMENT,
+                    name TEXT NOT NULL,
                     teacher_id INT DEFAULT NULL,
                     PRIMARY KEY(id),
                     KEY FK_TEACHER_ID (teacher_id),
@@ -189,9 +136,6 @@ public enum Schema {
                     PRIMARY KEY (id)
                 )
                 """;
-        }
-
-        public record Column(String name, Class<?> type) {
         }
     }
 }
