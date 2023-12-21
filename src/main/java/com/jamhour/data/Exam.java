@@ -48,7 +48,7 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
         COURSE_ID(TableColumnImpl.of("course_id", Integer.class)),
         NAME(TableColumnImpl.of("name", String.class)),
         DESCRIPTION(TableColumnImpl.of("description", String.class)),
-        EXAM_DATE_TIME(TableColumnImpl.of("exam_date_time", LocalDateTime.class));
+        EXAM_DATE_TIME(TableColumnImpl.of("date_time", LocalDateTime.class));
 
         private final TableColumn<?> tableColumn;
 
