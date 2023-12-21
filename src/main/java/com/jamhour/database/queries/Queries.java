@@ -1,5 +1,7 @@
 package com.jamhour.database.queries;
 
+import com.jamhour.data.Course;
+import com.jamhour.data.Exam;
 import com.jamhour.data.Student;
 import com.jamhour.data.Teacher;
 import com.jamhour.database.Database;
@@ -7,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
@@ -46,7 +49,7 @@ public class Queries {
             );
 
         } catch (SQLException sqlException) {
-            System.err.println(STR."Could not get student from table \{columnToGetStudentBy.getName()} using \{thingToGetStudentBy}: \{sqlException.getMessage()}");
+            System.err.println(STR."Could not get student from table \{Student.TABLE_NAME} Column: \{columnToGetStudentBy.getName()} using \{thingToGetStudentBy}: \{sqlException.getMessage()}");
             return Optional.empty();
         }
     }
@@ -92,7 +95,84 @@ public class Queries {
             );
 
         } catch (SQLException sqlException) {
-            System.err.println(STR."Could not get student from table \{columnToGetTeacherBy.getName()} using \{thingToGetTeacherBy}: \{sqlException.getMessage()}");
+            System.err.println(STR."Could not get student from table \{Teacher.TABLE_NAME} Column: \{columnToGetTeacherBy.getName()} using \{thingToGetTeacherBy}: \{sqlException.getMessage()}");
+            return Optional.empty();
+        }
+
+    }
+
+    public static <T> Optional<Exam> getExamBy(T thingToGetExamBy, Exam.Column columnToGetExamBy) {
+
+        if (!database.isConnected()) {
+            return Optional.empty();
+        }
+
+        final String query = STR."SELECT * FROM \{Exam.TABLE_NAME} WHERE \{columnToGetExamBy.getName()} = ?";
+        try (var preparedStatement = database.getConnection().prepareStatement(query)) {
+
+            switch (columnToGetExamBy) {
+                case Exam.Column.ID,
+                        Exam.Column.COURSE_ID -> preparedStatement.setInt(1, (int) thingToGetExamBy);
+                case Exam.Column.DESCRIPTION,
+                        Exam.Column.NAME -> preparedStatement.setString(1, (String) thingToGetExamBy);
+                case Exam.Column.EXAM_DATE_TIME ->
+                        preparedStatement.setTimestamp(1, java.sql.Timestamp.valueOf((LocalDateTime) thingToGetExamBy));
+            }
+
+            var resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+                return Optional.empty();
+            }
+
+            return Optional.of(
+                    new Exam(
+                            resultSet.getString(Exam.Column.ID.getName()),
+                            resultSet.getString(Exam.Column.DESCRIPTION.getName()),
+                            resultSet.getTimestamp(Exam.Column.EXAM_DATE_TIME.getName()).toLocalDateTime(),
+                            resultSet.getInt(Exam.Column.ID.getName()),
+                            resultSet.getInt(Exam.Column.COURSE_ID.getName())
+                    )
+            );
+
+        } catch (SQLException sqlException) {
+            System.err.println(STR."Could not get student from table \{Exam.TABLE_NAME} Column: \{columnToGetExamBy.getName()} using \{thingToGetExamBy}: \{sqlException.getMessage()}");
+            return Optional.empty();
+        }
+
+    }
+
+    public static <T> Optional<Course> getCourseBy(T thingToGetCourseBy, Course.Column columnToGetCourseBy) {
+
+        if (!database.isConnected()) {
+            return Optional.empty();
+        }
+
+        final String query = STR."SELECT * FROM \{Course.TABLE_NAME} WHERE \{columnToGetCourseBy.getName()} = ?";
+        try (var preparedStatement = database.getConnection().prepareStatement(query)) {
+
+            switch (columnToGetCourseBy) {
+                case Course.Column.ID,
+                        Course.Column.TEACHER_ID -> preparedStatement.setInt(1, (int) thingToGetCourseBy);
+                case Course.Column.NAME -> preparedStatement.setString(1, (String) thingToGetCourseBy);
+            }
+
+            var resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+                return Optional.empty();
+            }
+
+            return Optional.of(
+                    new Course(
+                            resultSet.getString(Course.Column.NAME.getName()),
+                            resultSet.getInt(Course.Column.ID.getName()),
+                            resultSet.getInt(Course.Column.TEACHER_ID.getName())
+                    )
+            );
+
+        } catch (SQLException sqlException) {
+            System.err.println(STR."Could not get student from table \{Course.TABLE_NAME} Column: \{columnToGetCourseBy.getName()} using \{thingToGetCourseBy}: \{sqlException.getMessage()}");
             return Optional.empty();
         }
 
