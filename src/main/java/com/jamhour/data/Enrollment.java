@@ -60,7 +60,7 @@ public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, i
     public enum Column {
 
         STATUS(TableColumnImpl.of("enrollment_status", EnrollmentStatus.class)),
-        PAYED(TableColumnImpl.of("payed", Boolean.class)),
+        PAID(TableColumnImpl.of("has_paid", Boolean.class)),
         COURSE_ID(TableColumnImpl.of("course_id", Integer.class, true)),
         STUDENT_ID(TableColumnImpl.of("student_id", Integer.class, true));
 
@@ -93,7 +93,7 @@ public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, i
         private static Map<TableColumn<?>, String> toMap() {
             return Map.ofEntries(
                     Column.STATUS.toEntry(),
-                    Column.PAYED.toEntry(),
+                    Column.PAID.toEntry(),
                     Column.COURSE_ID.toEntry(),
                     Column.STUDENT_ID.toEntry()
             );
