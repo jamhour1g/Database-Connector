@@ -1,5 +1,6 @@
 package com.jamhour.data;
 
+import com.jamhour.database.Schema;
 import com.jamhour.database.Table;
 import com.jamhour.database.TableColumn;
 import com.jamhour.database.TableColumnImpl;
@@ -12,8 +13,7 @@ import java.util.Map;
 public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, int studentId)
         implements Comparable<Enrollment>, Table {
 
-
-    public static final String TABLE_NAME = "enrollment";
+    public static final String TABLE_NAME = Schema.Tables.ENROLLMENT.getTableName();
     private static final Comparator<Enrollment> COMPARATOR =
             Comparator
                     .comparingInt(Enrollment::studentId)
@@ -59,7 +59,7 @@ public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, i
     @RequiredArgsConstructor
     public enum Column {
 
-        STATUS(TableColumnImpl.of("status", EnrollmentStatus.class)),
+        STATUS(TableColumnImpl.of("enrollment_status", EnrollmentStatus.class)),
         PAYED(TableColumnImpl.of("payed", Boolean.class)),
         COURSE_ID(TableColumnImpl.of("course_id", Integer.class, true)),
         STUDENT_ID(TableColumnImpl.of("student_id", Integer.class, true));
