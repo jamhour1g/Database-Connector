@@ -2,11 +2,14 @@ package com.jamhour.database.queries;
 
 import com.jamhour.data.*;
 import com.jamhour.database.Database;
+import com.jamhour.database.Schema;
 import lombok.NoArgsConstructor;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
@@ -246,6 +249,29 @@ public class Queries {
         } catch (SQLException sqlException) {
             System.err.println(STR."Could not get student from table \{Enrollment.TABLE_NAME} Column: \{columnToGetEnrollmentBy.getName()} using \{thingToGetCourseBy}: \{sqlException.getMessage()}");
             return Optional.empty();
+        }
+
+    }
+
+
+    public static <T> List<T> getAllInTable(Schema.Tables table) {
+
+        if (!database.isConnected()) {
+            return List.of();
+        }
+
+        final String query = STR."SELECT * FROM \{table.getTableName()}";
+        try (var resultSet = database.getStatement().executeQuery(query)) {
+
+            List<T> list = new ArrayList<>();
+
+            while (resultSet.next()) {
+                list.add(table.getObject(resultSet));
+            }
+
+            return list;
+        } catch (SQLException e) {
+            return List.of();
         }
 
     }
