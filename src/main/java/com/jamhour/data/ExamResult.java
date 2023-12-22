@@ -1,5 +1,6 @@
 package com.jamhour.data;
 
+import com.jamhour.database.Schema;
 import com.jamhour.database.Table;
 import com.jamhour.database.TableColumn;
 import com.jamhour.database.TableColumnImpl;
@@ -11,7 +12,7 @@ import java.util.Map;
 
 public record ExamResult(double grade, int examId, int studentId) implements Comparable<ExamResult>, Table {
 
-    public static final String TABLE_NAME = "exam_result";
+    public static final String TABLE_NAME = Schema.Tables.EXAM_RESULT.getTableName();
     private static final Comparator<ExamResult> COMPARATOR =
             Comparator
                     .comparingInt(ExamResult::examId)
@@ -41,9 +42,9 @@ public record ExamResult(double grade, int examId, int studentId) implements Com
     @Getter
     @RequiredArgsConstructor
     public enum Column {
-        ID(TableColumnImpl.of("id", Integer.class, true)),
+        STUDENT_ID(TableColumnImpl.of("student_id", Integer.class, true)),
         GRADE(TableColumnImpl.of("grade", Integer.class)),
-        EXAM_ID(TableColumnImpl.of("exam_id", Integer.class));
+        EXAM_ID(TableColumnImpl.of("exam_id", Integer.class, true));
 
         private final TableColumn<?> tableColumn;
 
@@ -73,7 +74,7 @@ public record ExamResult(double grade, int examId, int studentId) implements Com
 
         private static Map<TableColumn<?>, String> toMap() {
             return Map.ofEntries(
-                    Column.ID.toEntry(),
+                    Column.STUDENT_ID.toEntry(),
                     Column.GRADE.toEntry(),
                     Column.EXAM_ID.toEntry()
             );
