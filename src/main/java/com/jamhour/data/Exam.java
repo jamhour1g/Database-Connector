@@ -7,6 +7,8 @@ import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Map;
@@ -40,6 +42,16 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
     @Override
     public int getPrimaryKey() {
         return id();
+    }
+
+    public static Exam get(ResultSet resultSet) throws SQLException {
+        return new Exam(
+                resultSet.getString(Exam.Column.NAME.getName()),
+                resultSet.getString(Exam.Column.DESCRIPTION.getName()),
+                resultSet.getTimestamp(Exam.Column.EXAM_DATE_TIME.getName()).toLocalDateTime(),
+                resultSet.getInt(Exam.Column.ID.getName()),
+                resultSet.getInt(Exam.Column.COURSE_ID.getName())
+        );
     }
 
     @Getter

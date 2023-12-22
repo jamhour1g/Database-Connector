@@ -7,6 +7,8 @@ import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.Map;
 
@@ -37,6 +39,14 @@ public record ExamResult(double grade, int examId, int studentId) implements Com
     @Override
     public int compareTo(ExamResult other) {
         return COMPARATOR.compare(this, other);
+    }
+
+    public static ExamResult get(ResultSet resultSet) throws SQLException {
+        return new ExamResult(
+                resultSet.getDouble(ExamResult.Column.GRADE.getName()),
+                resultSet.getInt(ExamResult.Column.EXAM_ID.getName()),
+                resultSet.getInt(ExamResult.Column.STUDENT_ID.getName())
+        );
     }
 
     @Getter

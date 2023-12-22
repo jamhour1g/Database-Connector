@@ -7,6 +7,8 @@ import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Map;
@@ -42,6 +44,19 @@ public record Teacher(String name, String phone, String email, String major, dou
     @Override
     public int compareTo(Teacher other) {
         return COMPARATOR.compare(this, other);
+    }
+
+    public static Teacher get(ResultSet resultSet) throws SQLException {
+        return new Teacher(
+                resultSet.getString(Teacher.Column.NAME.getName()),
+                resultSet.getString(Teacher.Column.PHONE.getName()),
+                resultSet.getString(Teacher.Column.EMAIL.getName()),
+                resultSet.getString(Teacher.Column.MAJOR.getName()),
+                resultSet.getDouble(Teacher.Column.SALARY.getName()),
+                resultSet.getInt(Teacher.Column.EXPERIENCE.getName()),
+                resultSet.getDate(Teacher.Column.DATE_OF_BIRTH.getName()).toLocalDate(),
+                resultSet.getInt(Teacher.Column.ID.getName())
+        );
     }
 
     @Getter

@@ -7,6 +7,8 @@ import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.Map;
 
@@ -39,6 +41,15 @@ public record Student(String name, String email, String phone, int id) implement
     @Override
     public int compareTo(Student other) {
         return COMPARATOR.compare(this, other);
+    }
+
+    public static Student get(ResultSet resultSet) throws SQLException {
+        return new Student(
+                resultSet.getString(Student.Column.NAME.getName()),
+                resultSet.getString(Student.Column.EMAIL.getName()),
+                resultSet.getString(Student.Column.PHONE.getName()),
+                resultSet.getInt(Student.Column.ID.getName())
+        );
     }
 
     @Getter

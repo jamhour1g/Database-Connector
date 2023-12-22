@@ -7,6 +7,8 @@ import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.Map;
 
@@ -40,6 +42,15 @@ public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, i
     @Override
     public int compareTo(Enrollment other) {
         return COMPARATOR.compare(this, other);
+    }
+
+    public static Enrollment get(ResultSet resultSet) throws SQLException {
+        return new Enrollment(
+                Enrollment.EnrollmentStatus.valueOf(resultSet.getString(Enrollment.Column.STATUS.getName()).toUpperCase()),
+                resultSet.getBoolean(Enrollment.Column.PAID.getName()),
+                resultSet.getInt(Enrollment.Column.COURSE_ID.getName()),
+                resultSet.getInt(Enrollment.Column.STUDENT_ID.getName())
+        );
     }
 
     @Getter

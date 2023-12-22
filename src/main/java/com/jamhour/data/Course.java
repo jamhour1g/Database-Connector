@@ -7,6 +7,8 @@ import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.Map;
 
@@ -38,6 +40,14 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
     @Override
     public int getPrimaryKey() {
         return id();
+    }
+
+    public static Course get(ResultSet resultSet) throws SQLException {
+        return new Course(
+                resultSet.getString(Course.Column.NAME.getName()),
+                resultSet.getInt(Course.Column.ID.getName()),
+                resultSet.getInt(Course.Column.TEACHER_ID.getName())
+        );
     }
 
     @Getter
