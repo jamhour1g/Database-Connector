@@ -1,9 +1,6 @@
 package com.jamhour.database.queries;
 
-import com.jamhour.data.Course;
-import com.jamhour.data.Exam;
-import com.jamhour.data.Student;
-import com.jamhour.data.Teacher;
+import com.jamhour.data.*;
 import com.jamhour.database.Database;
 import lombok.NoArgsConstructor;
 
@@ -173,6 +170,81 @@ public class Queries {
 
         } catch (SQLException sqlException) {
             System.err.println(STR."Could not get student from table \{Course.TABLE_NAME} Column: \{columnToGetCourseBy.getName()} using \{thingToGetCourseBy}: \{sqlException.getMessage()}");
+            return Optional.empty();
+        }
+
+    }
+
+    public static <T> Optional<ExamResult> getExamResultBy(T thingToGetCourseBy, ExamResult.Column columnToGetExamResultBy) {
+
+        if (!database.isConnected()) {
+            return Optional.empty();
+        }
+
+        final String query = STR."SELECT * FROM \{ExamResult.TABLE_NAME} WHERE \{columnToGetExamResultBy.getName()} = ?";
+        try (var preparedStatement = database.getConnection().prepareStatement(query)) {
+
+            switch (columnToGetExamResultBy) {
+                case ExamResult.Column.STUDENT_ID,
+                        ExamResult.Column.EXAM_ID -> preparedStatement.setInt(1, (int) thingToGetCourseBy);
+                case ExamResult.Column.GRADE -> preparedStatement.setDouble(1, (double) thingToGetCourseBy);
+            }
+
+            var resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+                return Optional.empty();
+            }
+
+            return Optional.of(
+                    new ExamResult(
+                            resultSet.getDouble(ExamResult.Column.GRADE.getName()),
+                            resultSet.getInt(ExamResult.Column.EXAM_ID.getName()),
+                            resultSet.getInt(ExamResult.Column.STUDENT_ID.getName())
+                    )
+            );
+
+        } catch (SQLException sqlException) {
+            System.err.println(STR."Could not get student from table \{ExamResult.TABLE_NAME} Column: \{columnToGetExamResultBy.getName()} using \{thingToGetCourseBy}: \{sqlException.getMessage()}");
+            return Optional.empty();
+        }
+
+    }
+
+    public static <T> Optional<Enrollment> getEnrollmentBy(T thingToGetCourseBy, Enrollment.Column columnToGetEnrollmentBy) {
+
+        if (!database.isConnected()) {
+            return Optional.empty();
+        }
+
+        final String query = STR."SELECT * FROM \{Enrollment.TABLE_NAME} WHERE \{columnToGetEnrollmentBy.getName()} = ?";
+        try (var preparedStatement = database.getConnection().prepareStatement(query)) {
+
+            switch (columnToGetEnrollmentBy) {
+                case Enrollment.Column.STUDENT_ID, Enrollment.Column.COURSE_ID ->
+                        preparedStatement.setInt(1, (int) thingToGetCourseBy);
+                case Enrollment.Column.PAID -> preparedStatement.setBoolean(1, (boolean) thingToGetCourseBy);
+                case Enrollment.Column.STATUS ->
+                        preparedStatement.setString(1, ((Enrollment.EnrollmentStatus) thingToGetCourseBy).getStatus());
+            }
+
+            var resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+                return Optional.empty();
+            }
+
+            return Optional.of(
+                    new Enrollment(
+                            Enrollment.EnrollmentStatus.valueOf(resultSet.getString(Enrollment.Column.STATUS.getName()).toUpperCase()),
+                            resultSet.getBoolean(Enrollment.Column.PAID.getName()),
+                            resultSet.getInt(Enrollment.Column.COURSE_ID.getName()),
+                            resultSet.getInt(Enrollment.Column.STUDENT_ID.getName())
+                    )
+            );
+
+        } catch (SQLException sqlException) {
+            System.err.println(STR."Could not get student from table \{Enrollment.TABLE_NAME} Column: \{columnToGetEnrollmentBy.getName()} using \{thingToGetCourseBy}: \{sqlException.getMessage()}");
             return Optional.empty();
         }
 
