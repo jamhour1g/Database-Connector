@@ -1,20 +1,18 @@
 package com.jamhour.data;
 
-import com.jamhour.database.Schema;
-import com.jamhour.database.Table;
 import com.jamhour.database.TableColumn;
 import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.Map;
 
-public record Student(String name, String email, String phone, int id) implements Comparable<Student>, Table {
+public record Student(String name, String email, String phone, int id) implements Comparable<Student> {
 
-    public static final String TABLE_NAME = Schema.Tables.STUDENT.getTableName();
     private static final Comparator<Student> COMPARATOR =
             Comparator
                     .comparingInt(Student::id)
@@ -22,21 +20,10 @@ public record Student(String name, String email, String phone, int id) implement
                     .thenComparing(Student::name)
                     .thenComparing(Student::email);
 
-
-    @Override
-    public Map<TableColumn<?>, String> getTableColumns() {
+    public static Map<Enum<? extends TableColumn>, String> getTableColumns() {
         return Column.toMap();
     }
 
-    @Override
-    public String getTableName() {
-        return TABLE_NAME;
-    }
-
-    @Override
-    public int getPrimaryKey() {
-        return id();
-    }
 
     @Override
     public int compareTo(Student other) {
@@ -45,49 +32,90 @@ public record Student(String name, String email, String phone, int id) implement
 
     public static Student get(ResultSet resultSet) throws SQLException {
         return new Student(
-                resultSet.getString(Student.Column.NAME.getName()),
-                resultSet.getString(Student.Column.EMAIL.getName()),
-                resultSet.getString(Student.Column.PHONE.getName()),
-                resultSet.getInt(Student.Column.ID.getName())
+                resultSet.getString(Column.NAME.columnName()),
+                resultSet.getString(Column.EMAIL.columnName()),
+                resultSet.getString(Column.PHONE.columnName()),
+                resultSet.getInt(Column.ID.columnName())
         );
     }
 
     @Getter
     @RequiredArgsConstructor
-    public enum Column {
+    public enum Column implements TableColumn {
 
-        ID(TableColumnImpl.of("id", Integer.class, true)),
-        NAME(TableColumnImpl.of("name", String.class)),
-        EMAIL(TableColumnImpl.of("email", String.class)),
-        PHONE(TableColumnImpl.of("phone", String.class));
+        ID(
+                TableColumnImpl.builder()
+                        .columnName("id")
+                        .type(Integer.class)
+                        .isPrimaryKey(true)
+                        .build()
+        ),
+        NAME(
+                TableColumnImpl.builder()
+                        .columnName("name")
+                        .type(String.class)
+                        .build()
+        ),
+        EMAIL(
+                TableColumnImpl.builder()
+                        .columnName("email")
+                        .type(String.class)
+                        .build()
+        ),
+        PHONE(
+                TableColumnImpl.builder()
+                        .columnName("phone")
+                        .type(String.class)
+                        .build()
+        );
 
-        private final TableColumn<?> tableColumn;
+        private final TableColumn tableColumn;
 
-        private TableColumn<?> getTableColumn() {
-            return tableColumn;
+        @Override
+        public String columnName() {
+            return tableColumn.columnName();
         }
 
+        @Override
         public Class<?> getType() {
             return tableColumn.getType();
         }
 
-        public String getName() {
-            return tableColumn.name();
-        }
-
+        @Override
         public boolean isPrimaryKey() {
             return tableColumn.isPrimaryKey();
         }
 
+        @Override
         public boolean isNullable() {
             return tableColumn.isNullable();
         }
 
-        private Map.Entry<TableColumn<?>, String> toEntry() {
-            return Map.entry(getTableColumn(), getName());
+        @Override
+        public boolean isForeignKey() {
+            return tableColumn.isForeignKey();
         }
 
-        private static Map<TableColumn<?>, String> toMap() {
+        public static <T> PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                                             Column column,
+                                                             T thingToSet) throws SQLException {
+            return switch (column) {
+                case ID -> {
+                    preparedStatement.setInt(1, (int) thingToSet);
+                    yield preparedStatement;
+                }
+                case NAME, EMAIL, PHONE -> {
+                    preparedStatement.setString(1, (String) thingToSet);
+                    yield preparedStatement;
+                }
+            };
+        }
+
+        private Map.Entry<Enum<? extends TableColumn>, String> toEntry() {
+            return Map.entry(this, columnName());
+        }
+
+        private static Map<Enum<? extends TableColumn>, String> toMap() {
             return Map.ofEntries(
                     Column.ID.toEntry(),
                     Column.NAME.toEntry(),

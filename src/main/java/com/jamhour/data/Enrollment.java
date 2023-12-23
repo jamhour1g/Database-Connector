@@ -1,21 +1,19 @@
 package com.jamhour.data;
 
-import com.jamhour.database.Schema;
-import com.jamhour.database.Table;
 import com.jamhour.database.TableColumn;
 import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.Map;
 
 public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, int studentId)
-        implements Comparable<Enrollment>, Table {
+        implements Comparable<Enrollment> {
 
-    public static final String TABLE_NAME = Schema.Tables.ENROLLMENT.getTableName();
     private static final Comparator<Enrollment> COMPARATOR =
             Comparator
                     .comparingInt(Enrollment::studentId)
@@ -24,19 +22,8 @@ public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, i
                     .thenComparing(Enrollment::status);
 
 
-    @Override
-    public Map<TableColumn<?>, String> getTableColumns() {
+    public static Map<Enum<? extends TableColumn>, String> getTableColumns() {
         return Column.toMap();
-    }
-
-    @Override
-    public String getTableName() {
-        return TABLE_NAME;
-    }
-
-    @Override
-    public int getPrimaryKey() {
-        return studentId;
     }
 
     @Override
@@ -46,10 +33,10 @@ public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, i
 
     public static Enrollment get(ResultSet resultSet) throws SQLException {
         return new Enrollment(
-                Enrollment.EnrollmentStatus.valueOf(resultSet.getString(Enrollment.Column.STATUS.getName()).toUpperCase()),
-                resultSet.getBoolean(Enrollment.Column.PAID.getName()),
-                resultSet.getInt(Enrollment.Column.COURSE_ID.getName()),
-                resultSet.getInt(Enrollment.Column.STUDENT_ID.getName())
+                EnrollmentStatus.valueOf(resultSet.getString(Column.STATUS.columnName()).toUpperCase()),
+                resultSet.getBoolean(Column.PAID.columnName()),
+                resultSet.getInt(Column.COURSE_ID.columnName()),
+                resultSet.getInt(Column.STUDENT_ID.columnName())
         );
     }
 
@@ -68,40 +55,90 @@ public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, i
 
     @Getter
     @RequiredArgsConstructor
-    public enum Column {
+    public enum Column implements TableColumn {
 
-        STATUS(TableColumnImpl.of("enrollment_status", EnrollmentStatus.class)),
-        PAID(TableColumnImpl.of("has_paid", Boolean.class)),
-        COURSE_ID(TableColumnImpl.of("course_id", Integer.class, true)),
-        STUDENT_ID(TableColumnImpl.of("student_id", Integer.class, true));
+        STATUS(
+                TableColumnImpl.builder()
+                        .columnName("status")
+                        .type(EnrollmentStatus.class)
+                        .isNullable(true)
+                        .build()
+        ),
+        PAID(
+                TableColumnImpl.builder()
+                        .columnName("has_paid")
+                        .type(Boolean.class)
+                        .isNullable(true)
+                        .build()
+        ),
+        COURSE_ID(
+                TableColumnImpl.builder()
+                        .columnName("course_id")
+                        .type(Integer.class)
+                        .isForeignKey(true)
+                        .isForeignKey(true)
+                        .build()
+        ),
+        STUDENT_ID(
+                TableColumnImpl.builder()
+                        .columnName("student_id")
+                        .type(Integer.class)
+                        .isForeignKey(true)
+                        .isForeignKey(true)
+                        .build()
+        );
 
-        private final TableColumn<?> tableColumn;
+        private final TableColumn tableColumn;
 
-        private TableColumn<?> getTableColumn() {
-            return tableColumn;
+        @Override
+        public String columnName() {
+            return tableColumn.columnName();
         }
 
+        @Override
         public Class<?> getType() {
             return tableColumn.getType();
         }
 
-        public String getName() {
-            return tableColumn.name();
-        }
-
+        @Override
         public boolean isPrimaryKey() {
             return tableColumn.isPrimaryKey();
         }
 
+        @Override
         public boolean isNullable() {
             return tableColumn.isNullable();
         }
 
-        private Map.Entry<TableColumn<?>, String> toEntry() {
-            return Map.entry(getTableColumn(), getName());
+        @Override
+        public boolean isForeignKey() {
+            return tableColumn.isForeignKey();
         }
 
-        private static Map<TableColumn<?>, String> toMap() {
+        public static <T> PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                                             Column column,
+                                                             T thingToSet) throws SQLException {
+            return switch (column) {
+                case STATUS -> {
+                    preparedStatement.setString(1, (String) thingToSet);
+                    yield preparedStatement;
+                }
+                case PAID -> {
+                    preparedStatement.setBoolean(1, (boolean) thingToSet);
+                    yield preparedStatement;
+                }
+                case COURSE_ID, STUDENT_ID -> {
+                    preparedStatement.setInt(1, (int) thingToSet);
+                    yield preparedStatement;
+                }
+            };
+        }
+
+        private Map.Entry<Enum<? extends TableColumn>, String> toEntry() {
+            return Map.entry(this, columnName());
+        }
+
+        private static Map<Enum<? extends TableColumn>, String> toMap() {
             return Map.ofEntries(
                     Column.STATUS.toEntry(),
                     Column.PAID.toEntry(),

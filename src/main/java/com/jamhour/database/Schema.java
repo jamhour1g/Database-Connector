@@ -1,7 +1,13 @@
 package com.jamhour.database;
 
+import com.jamhour.data.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Map;
 
 @Getter
 @RequiredArgsConstructor
@@ -19,7 +25,7 @@ public enum Schema {
     }
 
     @Getter
-    public enum Tables {
+    public enum Tables implements Table {
         TEACHER("teacher"),
         STUDENT("student"),
         COURSE("course"),
@@ -137,5 +143,47 @@ public enum Schema {
                 )
                 """;
         }
+
+        public Map<Enum<? extends TableColumn>, String> getTableColumns() {
+            return switch (this) {
+                case TEACHER -> Teacher.getTableColumns();
+                case STUDENT -> Student.getTableColumns();
+                case COURSE -> Course.getTableColumns();
+                case EXAM -> Exam.getTableColumns();
+                case EXAM_RESULT -> ExamResult.getTableColumns();
+                case ENROLLMENT -> Enrollment.getTableColumns();
+            };
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> T getObject(ResultSet resultSet) throws SQLException {
+            return switch (this) {
+                case TEACHER -> (T) Teacher.get(resultSet);
+                case STUDENT -> (T) Student.get(resultSet);
+                case COURSE -> (T) Course.get(resultSet);
+                case EXAM -> (T) Exam.get(resultSet);
+                case EXAM_RESULT -> (T) ExamResult.get(resultSet);
+                case ENROLLMENT -> (T) Enrollment.get(resultSet);
+            };
+        }
+
+        @Override
+        public <T> PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                                      Enum<? extends TableColumn> column,
+                                                      T thingToSet) throws SQLException {
+            return switch (this) {
+                case TEACHER -> Teacher.Column.setColumnDetails(preparedStatement, (Teacher.Column) column, thingToSet);
+                case STUDENT -> Student.Column.setColumnDetails(preparedStatement, (Student.Column) column, thingToSet);
+                case COURSE -> Course.Column.setColumnDetails(preparedStatement, (Course.Column) column, thingToSet);
+                case EXAM -> Exam.Column.setColumnDetails(preparedStatement, (Exam.Column) column, thingToSet);
+                case EXAM_RESULT ->
+                        ExamResult.Column.setColumnDetails(preparedStatement, (ExamResult.Column) column, thingToSet);
+                case ENROLLMENT ->
+                        Enrollment.Column.setColumnDetails(preparedStatement, (Enrollment.Column) column, thingToSet);
+            };
+        }
+
+
     }
 }

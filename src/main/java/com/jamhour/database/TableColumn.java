@@ -1,10 +1,14 @@
 package com.jamhour.database;
 
-public interface TableColumn<T> {
+public interface TableColumn {
+    String columnName();
 
-    String name();
-    Class<T> getType();
+    Class<?> getType();
 
     boolean isPrimaryKey();
+
     boolean isNullable();
+
+    boolean isForeignKey();
+
 }
