@@ -3,7 +3,7 @@ package com.jamhour.database.queries;
 import com.jamhour.database.Database;
 import com.jamhour.database.Schema;
 import com.jamhour.database.TableColumn;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,13 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
+@UtilityClass
 public class Queries {
 
-    private static final Database database = Database.getInstance();
-    public static final String DATABASE_NOT_CONNECTED_MESSAGE = STR."Database \{Schema.NAME} is not connected";
+    private final Database database = Database.getInstance();
+    public final String DATABASE_NOT_CONNECTED_MESSAGE = STR."Database \{Schema.NAME} is not connected";
 
-    public static <T, S extends Enum<? extends TableColumn> & TableColumn, R>
+    public <T, S extends Enum<? extends TableColumn> & TableColumn, R>
     Optional<R> getFromTableUsing(Schema.Tables table, S column, T value) {
 
         if (!database.isConnected()) {
@@ -51,7 +51,7 @@ public class Queries {
 
     }
 
-    public static <T> List<T> getAllInTable(Schema.Tables table) {
+    public <T> List<T> getAllInTable(Schema.Tables table) {
 
         if (!database.isConnected()) {
             throw new IllegalStateException(DATABASE_NOT_CONNECTED_MESSAGE);
