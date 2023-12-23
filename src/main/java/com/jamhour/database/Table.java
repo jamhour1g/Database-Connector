@@ -8,11 +8,11 @@ import java.util.Map;
 
 public interface Table {
 
-    <T extends Enum<? extends TableColumn> & TableColumn> Map<T, String> getTableColumns();
+    Map<TableColumn, String> getTableColumns();
 
     String getTableName();
 
-    default List<? extends Enum<? extends TableColumn>> getPrimaryKeys() {
+    default List<TableColumn> getPrimaryKeys() {
         return getTableColumns()
                 .keySet()
                 .stream()
@@ -20,7 +20,7 @@ public interface Table {
                 .toList();
     }
 
-    default List<? extends Enum<? extends TableColumn>> getForeignKeys() {
+    default List<TableColumn> getForeignKeys() {
         return getTableColumns()
                 .keySet()
                 .stream()
@@ -30,6 +30,6 @@ public interface Table {
 
     <T> T getObject(ResultSet resultSet) throws SQLException;
 
-    <T> PreparedStatement setColumnDetails(PreparedStatement preparedStatement, Enum<? extends TableColumn> column, T thingToSet) throws SQLException;
+    <T> PreparedStatement setColumnDetails(PreparedStatement preparedStatement, TableColumn column, T thingToSet) throws SQLException;
 
 }

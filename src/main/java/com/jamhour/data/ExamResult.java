@@ -19,7 +19,7 @@ public record ExamResult(double grade, int examId, int studentId) implements Com
                     .thenComparingInt(ExamResult::studentId)
                     .thenComparingDouble(ExamResult::grade);
 
-    public static Map<Enum<? extends TableColumn>, String> getTableColumns() {
+    public static Map<TableColumn, String> getTableColumns() {
         return Column.toMap();
     }
 
@@ -105,11 +105,11 @@ public record ExamResult(double grade, int examId, int studentId) implements Com
             return tableColumn.isForeignKey();
         }
 
-        private Map.Entry<Enum<? extends TableColumn>, String> toEntry() {
+        private Map.Entry<TableColumn, String> toEntry() {
             return Map.entry(this, columnName());
         }
 
-        private static Map<Enum<? extends TableColumn>, String> toMap() {
+        private static Map<TableColumn, String> toMap() {
             return Map.ofEntries(
                     Column.STUDENT_ID.toEntry(),
                     Column.GRADE.toEntry(),

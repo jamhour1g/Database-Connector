@@ -2,6 +2,7 @@ package com.jamhour.database.queries;
 
 import com.jamhour.database.Database;
 import com.jamhour.database.Schema;
+import com.jamhour.database.Table;
 import com.jamhour.database.TableColumn;
 import lombok.experimental.UtilityClass;
 
@@ -17,16 +18,16 @@ public class Queries {
     private final Database database = Database.getInstance();
     public final String DATABASE_NOT_CONNECTED_MESSAGE = STR."Database \{Schema.NAME} is not connected";
 
-    public <T, S extends Enum<? extends TableColumn> & TableColumn, R>
-    Optional<R> getFromTableUsing(Schema.Tables table, S column, T value) {
+    public <T, R>
+    Optional<R> getFromTableUsing(Table table, TableColumn column, T value) {
 
         if (!database.isConnected()) {
             throw new IllegalStateException(DATABASE_NOT_CONNECTED_MESSAGE);
         }
 
-        String columnName = table.getTableColumns().get(column);
+        final boolean isColumnInTable = table.getTableColumns().containsKey(column);
 
-        if (columnName == null) {
+        if (!isColumnInTable) {
             throw new IllegalArgumentException(STR."Column \{column.columnName()} does not exist on table \{table.getTableName()}");
         }
 
@@ -34,7 +35,7 @@ public class Queries {
             throw new IllegalArgumentException(STR."Column \{column.columnName()} is of type \{column.getType()} but value is of type \{value.getClass()}");
         }
 
-        final String query = STR."SELECT * FROM \{table.getTableName()} WHERE \{columnName} = ?";
+        final String query = STR."SELECT * FROM \{table.getTableName()} WHERE \{column.columnName()} = ?";
         try (var preparedStatement = database.getConnection().prepareStatement(query)) {
 
             ResultSet resultSet = table.setColumnDetails(preparedStatement, column, value).executeQuery();
@@ -51,7 +52,7 @@ public class Queries {
 
     }
 
-    public <T> List<T> getAllInTable(Schema.Tables table) {
+    public <T> List<T> getAllInTable(Table table) {
 
         if (!database.isConnected()) {
             throw new IllegalStateException(DATABASE_NOT_CONNECTED_MESSAGE);

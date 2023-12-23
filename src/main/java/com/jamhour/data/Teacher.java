@@ -24,7 +24,7 @@ public record Teacher(String name, String phone, String email, String major, dou
                     .thenComparing(Teacher::experience)
                     .thenComparing(Teacher::salary);
 
-    public static Map<Enum<? extends TableColumn>, String> getTableColumns() {
+    public static Map<TableColumn, String> getTableColumns() {
         return Column.toMap();
     }
 
@@ -150,11 +150,11 @@ public record Teacher(String name, String phone, String email, String major, dou
             };
         }
 
-        private Map.Entry<Enum<? extends TableColumn>, String> toEntry() {
+        private Map.Entry<TableColumn, String> toEntry() {
             return Map.entry(this, columnName());
         }
 
-        private static Map<Enum<? extends TableColumn>, String> toMap() {
+        private static Map<TableColumn, String> toMap() {
             return Map.ofEntries(
                     Column.NAME.toEntry(),
                     Column.PHONE.toEntry(),

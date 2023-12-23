@@ -144,7 +144,7 @@ public enum Schema {
                 """;
         }
 
-        public Map<Enum<? extends TableColumn>, String> getTableColumns() {
+        public Map<TableColumn, String> getTableColumns() {
             return switch (this) {
                 case TEACHER -> Teacher.getTableColumns();
                 case STUDENT -> Student.getTableColumns();
@@ -170,7 +170,7 @@ public enum Schema {
 
         @Override
         public <T> PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
-                                                      Enum<? extends TableColumn> column,
+                                                      TableColumn column,
                                                       T thingToSet) throws SQLException {
             return switch (this) {
                 case TEACHER -> Teacher.Column.setColumnDetails(preparedStatement, (Teacher.Column) column, thingToSet);
@@ -184,6 +184,6 @@ public enum Schema {
             };
         }
 
-
     }
+
 }

@@ -22,7 +22,7 @@ public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, i
                     .thenComparing(Enrollment::status);
 
 
-    public static Map<Enum<? extends TableColumn>, String> getTableColumns() {
+    public static Map<TableColumn, String> getTableColumns() {
         return Column.toMap();
     }
 
@@ -134,11 +134,11 @@ public record Enrollment(EnrollmentStatus status, boolean payed, int courseId, i
             };
         }
 
-        private Map.Entry<Enum<? extends TableColumn>, String> toEntry() {
+        private Map.Entry<TableColumn, String> toEntry() {
             return Map.entry(this, columnName());
         }
 
-        private static Map<Enum<? extends TableColumn>, String> toMap() {
+        private static Map<TableColumn, String> toMap() {
             return Map.ofEntries(
                     Column.STATUS.toEntry(),
                     Column.PAID.toEntry(),

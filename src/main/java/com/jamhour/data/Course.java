@@ -25,7 +25,7 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
         return COMPARATOR.compare(this, other);
     }
 
-    public static Map<Enum<? extends TableColumn>, String> getTableColumns() {
+    public static Map<TableColumn, String> getTableColumns() {
         return Column.toMap();
     }
 
@@ -105,11 +105,11 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
             };
         }
 
-        private Map.Entry<Enum<? extends TableColumn>, String> toEntry() {
+        private Map.Entry<TableColumn, String> toEntry() {
             return Map.entry(this, columnName());
         }
 
-        private static Map<Enum<? extends TableColumn>, String> toMap() {
+        private static Map<TableColumn, String> toMap() {
             return Map.ofEntries(
                     Column.ID.toEntry(),
                     Column.TEACHER_ID.toEntry(),

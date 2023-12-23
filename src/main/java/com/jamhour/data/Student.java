@@ -20,7 +20,7 @@ public record Student(String name, String email, String phone, int id) implement
                     .thenComparing(Student::name)
                     .thenComparing(Student::email);
 
-    public static Map<Enum<? extends TableColumn>, String> getTableColumns() {
+    public static Map<TableColumn, String> getTableColumns() {
         return Column.toMap();
     }
 
@@ -111,11 +111,11 @@ public record Student(String name, String email, String phone, int id) implement
             };
         }
 
-        private Map.Entry<Enum<? extends TableColumn>, String> toEntry() {
+        private Map.Entry<TableColumn, String> toEntry() {
             return Map.entry(this, columnName());
         }
 
-        private static Map<Enum<? extends TableColumn>, String> toMap() {
+        private static Map<TableColumn, String> toMap() {
             return Map.ofEntries(
                     Column.ID.toEntry(),
                     Column.NAME.toEntry(),
