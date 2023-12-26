@@ -1,41 +1,18 @@
 package com.jamhour.database;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Builder;
 
-@RequiredArgsConstructor(staticName = "of")
-public class TableColumnImpl<T> implements TableColumn<T> {
-
-    private final String name;
-    private final Class<T> type;
-    private final boolean isPrimaryKey;
-    private final boolean isNullable;
-
-
-    public static <T> TableColumnImpl<T> of(String name, Class<T> type, boolean isPrimaryKey) {
-        return new TableColumnImpl<>(name, type, isPrimaryKey, false);
-    }
-
-    public static <T> TableColumnImpl<T> of(String name, Class<T> type) {
-        return TableColumnImpl.of(name, type, false);
-    }
-
-
-    public String name() {
-        return name;
-    }
+@Builder
+public record TableColumnImpl(
+        String columnName,
+        boolean isPrimaryKey,
+        boolean isForeignKey,
+        boolean isNullable,
+        Class<?> type
+) implements TableColumn {
 
     @Override
-    public Class<T> getType() {
-        return type;
-    }
-
-    @Override
-    public boolean isPrimaryKey() {
-        return isPrimaryKey;
-    }
-
-    @Override
-    public boolean isNullable() {
-        return isNullable;
+    public Class<?> getType() {
+        return type();
     }
 }

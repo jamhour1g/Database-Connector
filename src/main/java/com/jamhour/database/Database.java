@@ -63,6 +63,14 @@ public class Database implements AutoCloseable {
         }
     }
 
+    public String enquoteLiteral(String value) {
+        try {
+            return getStatement().enquoteLiteral(value);
+        } catch (SQLException e) {
+            return "";
+        }
+    }
+
     public static Database getInstance() {
         if (instance == null) {
             instance = new Database();
