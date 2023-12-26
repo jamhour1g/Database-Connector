@@ -43,4 +43,5 @@ public interface Table {
     String getColumns();
 
     String getValues(Object thingToInsert);
+
 }
