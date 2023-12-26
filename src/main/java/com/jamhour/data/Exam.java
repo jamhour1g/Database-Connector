@@ -1,5 +1,6 @@
 package com.jamhour.data;
 
+import com.jamhour.database.Database;
 import com.jamhour.database.TableColumn;
 import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
@@ -9,8 +10,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public record Exam(String name, String description, LocalDateTime examDateTime, int id,
                    int courseId) implements Comparable<Exam> {
@@ -21,6 +24,14 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
                     .thenComparing(Exam::examDateTime)
                     .thenComparing(Exam::name)
                     .thenComparing(Exam::description);
+
+    public static String getInsertColumns() {
+        return Column.getInsertColumns();
+    }
+
+    public static String getInsertValues(Exam thingToInsert) {
+        return Column.getInsertValues(thingToInsert);
+    }
 
     @Override
     public int compareTo(Exam o) {
@@ -44,20 +55,6 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
     @Getter
     @RequiredArgsConstructor
     public enum Column implements TableColumn {
-        ID(
-                TableColumnImpl.builder()
-                        .columnName("id")
-                        .type(Integer.class)
-                        .isPrimaryKey(true)
-                        .build()
-        ),
-        COURSE_ID(
-                TableColumnImpl.builder()
-                        .columnName("course_id")
-                        .type(Integer.class)
-                        .isForeignKey(true)
-                        .build()
-        ),
         NAME(
                 TableColumnImpl.builder()
                         .columnName("name")
@@ -76,9 +73,34 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
                         .columnName("date_time")
                         .type(LocalDateTime.class)
                         .build()
+        ),
+        ID(
+                TableColumnImpl.builder()
+                        .columnName("id")
+                        .type(Integer.class)
+                        .isPrimaryKey(true)
+                        .build()
+        ),
+        COURSE_ID(
+                TableColumnImpl.builder()
+                        .columnName("course_id")
+                        .type(Integer.class)
+                        .isForeignKey(true)
+                        .build()
         );
 
         private final TableColumn tableColumn;
+
+        public static String getInsertValues(Exam thingToInsert) {
+            return "%s,%s,%s,%s,%s"
+                    .formatted(
+                            Database.getInstance().enquoteLiteral(thingToInsert.name()),
+                            Database.getInstance().enquoteLiteral(thingToInsert.description()),
+                            Database.getInstance().enquoteLiteral(String.valueOf(thingToInsert.examDateTime())),
+                            Database.getInstance().enquoteLiteral(String.valueOf(thingToInsert.id())),
+                            Database.getInstance().enquoteLiteral(String.valueOf(thingToInsert.courseId()))
+                    );
+        }
 
         @Override
         public String columnName() {
@@ -105,9 +127,9 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
             return tableColumn.isForeignKey();
         }
 
-        public static <T> PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
-                                                             Exam.Column column,
-                                                             T thingToSet) throws SQLException {
+        public static PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                                         Exam.Column column,
+                                                         Object thingToSet) throws SQLException {
             return switch (column) {
                 case ID, COURSE_ID -> {
                     preparedStatement.setInt(1, (int) thingToSet);
@@ -122,6 +144,34 @@ public record Exam(String name, String description, LocalDateTime examDateTime, 
                     yield preparedStatement;
                 }
             };
+        }
+
+        public static PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                                         Column columnToSet,
+                                                         Object valueToSet,
+                                                         Column columnToCompare,
+                                                         Object valueToCompare) throws SQLException {
+            switch (columnToSet) {
+                case ID, COURSE_ID -> preparedStatement.setInt(1, (int) valueToSet);
+                case NAME, DESCRIPTION -> preparedStatement.setString(1, (String) valueToSet);
+                case EXAM_DATE_TIME ->
+                        preparedStatement.setTimestamp(1, java.sql.Timestamp.valueOf((LocalDateTime) valueToSet));
+            }
+
+            switch (columnToCompare) {
+                case ID, COURSE_ID -> preparedStatement.setInt(2, (int) valueToCompare);
+                case NAME, DESCRIPTION -> preparedStatement.setString(2, (String) valueToCompare);
+                case EXAM_DATE_TIME ->
+                        preparedStatement.setTimestamp(2, java.sql.Timestamp.valueOf((LocalDateTime) valueToCompare));
+            }
+
+            return preparedStatement;
+        }
+
+        public static String getInsertColumns() {
+            return Arrays.stream(values())
+                    .map(Column::columnName)
+                    .collect(Collectors.joining(","));
         }
 
         private Map.Entry<TableColumn, String> toEntry() {

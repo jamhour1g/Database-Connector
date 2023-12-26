@@ -1,5 +1,6 @@
 package com.jamhour.data;
 
+import com.jamhour.database.Database;
 import com.jamhour.database.TableColumn;
 import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
@@ -8,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public record ExamResult(double grade, int examId, int studentId) implements Comparable<ExamResult> {
 
@@ -21,6 +24,14 @@ public record ExamResult(double grade, int examId, int studentId) implements Com
 
     public static Map<TableColumn, String> getTableColumns() {
         return Column.toMap();
+    }
+
+    public static String getInsertColumns() {
+        return Column.getInsertColumns();
+    }
+
+    public static String getInsertValues(ExamResult thingToInsert) {
+        return Column.getInsertValues(thingToInsert);
     }
 
     @Override
@@ -39,14 +50,6 @@ public record ExamResult(double grade, int examId, int studentId) implements Com
     @Getter
     @RequiredArgsConstructor
     public enum Column implements TableColumn {
-        STUDENT_ID(
-                TableColumnImpl.builder()
-                        .columnName("student_id")
-                        .type(Integer.class)
-                        .isPrimaryKey(true)
-                        .isForeignKey(true)
-                        .build()
-        ),
         GRADE(
                 TableColumnImpl.builder()
                         .columnName("grade")
@@ -61,9 +64,26 @@ public record ExamResult(double grade, int examId, int studentId) implements Com
                         .isPrimaryKey(true)
                         .isForeignKey(true)
                         .build()
+        ),
+        STUDENT_ID(
+                TableColumnImpl.builder()
+                        .columnName("student_id")
+                        .type(Integer.class)
+                        .isPrimaryKey(true)
+                        .isForeignKey(true)
+                        .build()
         );
 
         private final TableColumn tableColumn;
+
+        public static String getInsertValues(ExamResult thingToInsert) {
+            return "%s,%s,%s"
+                    .formatted(
+                            Database.getInstance().enquoteLiteral(String.valueOf(thingToInsert.grade())),
+                            Database.getInstance().enquoteLiteral(String.valueOf(thingToInsert.examId())),
+                            Database.getInstance().enquoteLiteral(String.valueOf(thingToInsert.studentId()))
+                    );
+        }
 
         @Override
         public String columnName() {
@@ -75,9 +95,9 @@ public record ExamResult(double grade, int examId, int studentId) implements Com
             return tableColumn.getType();
         }
 
-        public static <T> PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
-                                                             ExamResult.Column column,
-                                                             T thingToSet) throws SQLException {
+        public static PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                                         ExamResult.Column column,
+                                                         Object thingToSet) throws SQLException {
             return switch (column) {
                 case EXAM_ID, STUDENT_ID -> {
                     preparedStatement.setInt(1, (int) thingToSet);
@@ -88,6 +108,31 @@ public record ExamResult(double grade, int examId, int studentId) implements Com
                     yield preparedStatement;
                 }
             };
+        }
+
+        public static PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                                         Column columnToSet,
+                                                         Object valueToSet,
+                                                         Column columnToCompare,
+                                                         Object valueToCompare) throws SQLException {
+            switch (columnToSet) {
+                case EXAM_ID, STUDENT_ID -> preparedStatement.setInt(1, (int) valueToSet);
+                case GRADE -> preparedStatement.setDouble(1, (double) valueToSet);
+            }
+
+            switch (columnToCompare) {
+                case EXAM_ID, STUDENT_ID -> preparedStatement.setInt(1, (int) valueToCompare);
+                case GRADE -> preparedStatement.setDouble(1, (double) valueToCompare);
+            }
+
+
+            return preparedStatement;
+        }
+
+        public static String getInsertColumns() {
+            return Arrays.stream(values())
+                    .map(Column::columnName)
+                    .collect(Collectors.joining(","));
         }
 
         @Override

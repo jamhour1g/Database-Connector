@@ -1,5 +1,6 @@
 package com.jamhour.data;
 
+import com.jamhour.database.Database;
 import com.jamhour.database.TableColumn;
 import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
@@ -9,8 +10,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public record Teacher(String name, String phone, String email, String major, double salary, int experience,
                       LocalDate dateOfBirth, int id) implements Comparable<Teacher> {
@@ -26,6 +29,14 @@ public record Teacher(String name, String phone, String email, String major, dou
 
     public static Map<TableColumn, String> getTableColumns() {
         return Column.toMap();
+    }
+
+    public static String getInsertColumns() {
+        return Column.getInsertColumns();
+    }
+
+    public static String getInsertValues(Teacher teacher) {
+        return Column.getInsertValues(teacher);
     }
 
     @Override
@@ -127,9 +138,9 @@ public record Teacher(String name, String phone, String email, String major, dou
             return tableColumn.isForeignKey();
         }
 
-        public static <T> PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
-                                                             Teacher.Column column,
-                                                             T thingToSet) throws SQLException {
+        public static PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                                         Teacher.Column column,
+                                                         Object thingToSet) throws SQLException {
             return switch (column) {
                 case ID, EXPERIENCE -> {
                     preparedStatement.setInt(1, (int) thingToSet);
@@ -148,6 +159,48 @@ public record Teacher(String name, String phone, String email, String major, dou
                     yield preparedStatement;
                 }
             };
+        }
+
+        public static PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                                         Column columnToSet,
+                                                         Object valueToSet,
+                                                         Column columnToCompare,
+                                                         Object valueToCompare) throws SQLException {
+            switch (columnToSet) {
+                case ID, EXPERIENCE -> preparedStatement.setInt(1, (int) valueToSet);
+                case NAME, EMAIL, PHONE, MAJOR -> preparedStatement.setString(1, (String) valueToSet);
+                case SALARY -> preparedStatement.setDouble(1, (double) valueToSet);
+                case DATE_OF_BIRTH -> preparedStatement.setDate(1, java.sql.Date.valueOf((LocalDate) valueToSet));
+            }
+
+            switch (columnToCompare) {
+                case ID, EXPERIENCE -> preparedStatement.setInt(2, (int) valueToCompare);
+                case NAME, EMAIL, PHONE, MAJOR -> preparedStatement.setString(2, (String) valueToCompare);
+                case SALARY -> preparedStatement.setDouble(2, (double) valueToCompare);
+                case DATE_OF_BIRTH -> preparedStatement.setDate(2, java.sql.Date.valueOf((LocalDate) valueToCompare));
+            }
+
+            return preparedStatement;
+        }
+
+        public static String getInsertValues(Teacher teacherDetails) {
+            return "%s, %s, %s, %s, %s, %s, %s, %s"
+                    .formatted(
+                            Database.getInstance().enquoteLiteral(teacherDetails.name()),
+                            Database.getInstance().enquoteLiteral(teacherDetails.phone()),
+                            Database.getInstance().enquoteLiteral(teacherDetails.email()),
+                            Database.getInstance().enquoteLiteral(teacherDetails.major()),
+                            Database.getInstance().enquoteLiteral(String.valueOf(teacherDetails.salary())),
+                            Database.getInstance().enquoteLiteral(String.valueOf(teacherDetails.experience())),
+                            Database.getInstance().enquoteLiteral(String.valueOf(teacherDetails.dateOfBirth())),
+                            Database.getInstance().enquoteLiteral(String.valueOf(teacherDetails.id()))
+                    );
+        }
+
+        public static String getInsertColumns() {
+            return Arrays.stream(values())
+                    .map(Column::columnName)
+                    .collect(Collectors.joining(","));
         }
 
         private Map.Entry<TableColumn, String> toEntry() {

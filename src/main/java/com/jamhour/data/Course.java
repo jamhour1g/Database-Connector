@@ -1,5 +1,6 @@
 package com.jamhour.data;
 
+import com.jamhour.database.Database;
 import com.jamhour.database.TableColumn;
 import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
@@ -8,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public record Course(String name, int id, int teacherId) implements Comparable<Course> {
 
@@ -18,6 +21,14 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
                     .comparingInt(Course::id)
                     .thenComparing(Course::teacherId)
                     .thenComparing(Course::name);
+
+    public static String getInsertColumns() {
+        return Column.getInsertColumns();
+    }
+
+    public static String getInsertValues(Course thingToInsert) {
+        return Column.getInsertValues(thingToInsert);
+    }
 
 
     @Override
@@ -40,6 +51,12 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
     @Getter
     @RequiredArgsConstructor
     public enum Column implements TableColumn {
+        NAME(
+                TableColumnImpl.builder()
+                        .columnName("name")
+                        .type(String.class)
+                        .build()
+        ),
         ID(
                 TableColumnImpl.builder()
                         .columnName("id")
@@ -54,15 +71,19 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
                         .isForeignKey(true)
                         .isNullable(true)
                         .build()
-        ),
-        NAME(
-                TableColumnImpl.builder()
-                        .columnName("name")
-                        .type(String.class)
-                        .build()
         );
 
         private final TableColumn tableColumn;
+
+        public static String getInsertValues(Course thingToInsert) {
+            return "%s,%s,%s"
+                    .formatted(
+                            Database.getInstance().enquoteLiteral(thingToInsert.name()),
+                            Database.getInstance().enquoteLiteral(String.valueOf(thingToInsert.id())),
+                            Database.getInstance().enquoteLiteral(String.valueOf(thingToInsert.teacherId()))
+                    );
+
+        }
 
         @Override
         public String columnName() {
@@ -90,9 +111,9 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
             return tableColumn.isForeignKey();
         }
 
-        public static <T> PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
-                                                             Course.Column column,
-                                                             T thingToSet) throws SQLException {
+        public static PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                                         Course.Column column,
+                                                         Object thingToSet) throws SQLException {
             return switch (column) {
                 case ID, TEACHER_ID -> {
                     preparedStatement.setInt(1, (int) thingToSet);
@@ -103,6 +124,31 @@ public record Course(String name, int id, int teacherId) implements Comparable<C
                     yield preparedStatement;
                 }
             };
+        }
+
+        public static PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                                         Column columnToSet,
+                                                         Object valueToSet,
+                                                         Column columnToCompare,
+                                                         Object valueToCompare) throws SQLException {
+
+            switch (columnToSet) {
+                case ID, TEACHER_ID -> preparedStatement.setInt(1, (int) valueToSet);
+                case NAME -> preparedStatement.setString(1, (String) valueToSet);
+            }
+
+            switch (columnToCompare) {
+                case ID, TEACHER_ID -> preparedStatement.setInt(2, (int) valueToCompare);
+                case NAME -> preparedStatement.setString(2, (String) valueToCompare);
+            }
+
+            return preparedStatement;
+        }
+
+        public static String getInsertColumns() {
+            return Arrays.stream(values())
+                    .map(Column::columnName)
+                    .collect(Collectors.joining(","));
         }
 
         private Map.Entry<TableColumn, String> toEntry() {

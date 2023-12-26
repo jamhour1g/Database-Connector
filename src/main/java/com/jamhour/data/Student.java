@@ -1,5 +1,6 @@
 package com.jamhour.data;
 
+import com.jamhour.database.Database;
 import com.jamhour.database.TableColumn;
 import com.jamhour.database.TableColumnImpl;
 import lombok.Getter;
@@ -8,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public record Student(String name, String email, String phone, int id) implements Comparable<Student> {
 
@@ -24,6 +27,13 @@ public record Student(String name, String email, String phone, int id) implement
         return Column.toMap();
     }
 
+    public static String getInsertColumns() {
+        return Column.getInsertColumns();
+    }
+
+    public static String getInsertValues(Student student) {
+        return Column.getInsertValues(student);
+    }
 
     @Override
     public int compareTo(Student other) {
@@ -43,13 +53,6 @@ public record Student(String name, String email, String phone, int id) implement
     @RequiredArgsConstructor
     public enum Column implements TableColumn {
 
-        ID(
-                TableColumnImpl.builder()
-                        .columnName("id")
-                        .type(Integer.class)
-                        .isPrimaryKey(true)
-                        .build()
-        ),
         NAME(
                 TableColumnImpl.builder()
                         .columnName("name")
@@ -66,6 +69,13 @@ public record Student(String name, String email, String phone, int id) implement
                 TableColumnImpl.builder()
                         .columnName("phone")
                         .type(String.class)
+                        .build()
+        ),
+        ID(
+                TableColumnImpl.builder()
+                        .columnName("id")
+                        .type(Integer.class)
+                        .isPrimaryKey(true)
                         .build()
         );
 
@@ -96,9 +106,9 @@ public record Student(String name, String email, String phone, int id) implement
             return tableColumn.isForeignKey();
         }
 
-        public static <T> PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
-                                                             Column column,
-                                                             T thingToSet) throws SQLException {
+        public static PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                                         Column column,
+                                                         Object thingToSet) throws SQLException {
             return switch (column) {
                 case ID -> {
                     preparedStatement.setInt(1, (int) thingToSet);
@@ -109,6 +119,43 @@ public record Student(String name, String email, String phone, int id) implement
                     yield preparedStatement;
                 }
             };
+        }
+
+        public static PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                                         Column columnToSet,
+                                                         Object valueToSet,
+                                                         Column columnToCompare,
+                                                         Object valueToCompare) throws SQLException {
+
+            switch (columnToSet) {
+                case ID -> preparedStatement.setInt(1, (int) valueToSet);
+                case NAME, EMAIL, PHONE -> preparedStatement.setString(1, (String) valueToSet);
+            }
+
+            switch (columnToCompare) {
+                case ID -> preparedStatement.setInt(2, (int) valueToCompare);
+                case NAME, EMAIL, PHONE -> preparedStatement.setString(2, (String) valueToCompare);
+            }
+
+            return preparedStatement;
+        }
+
+        public static String getInsertValues(Student student) {
+
+            return "%s, %s, %s, %s"
+                    .formatted(
+                            Database.getInstance().enquoteLiteral(student.name()),
+                            Database.getInstance().enquoteLiteral(student.email()),
+                            Database.getInstance().enquoteLiteral(student.phone()),
+                            Database.getInstance().enquoteLiteral(String.valueOf(student.id()))
+                    );
+
+        }
+
+        public static String getInsertColumns() {
+            return Arrays.stream(values())
+                    .map(Column::columnName)
+                    .collect(Collectors.joining(","));
         }
 
         private Map.Entry<TableColumn, String> toEntry() {

@@ -30,6 +30,17 @@ public interface Table {
 
     <T> T getObject(ResultSet resultSet) throws SQLException;
 
-    <T> PreparedStatement setColumnDetails(PreparedStatement preparedStatement, TableColumn column, T thingToSet) throws SQLException;
+    PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                       TableColumn column,
+                                       Object thingToSet) throws SQLException;
 
+    PreparedStatement setColumnDetails(PreparedStatement preparedStatement,
+                                       TableColumn columnToSet,
+                                       Object valueToSet,
+                                       TableColumn columnToCompare,
+                                       Object valueToCompare) throws SQLException;
+
+    String getColumns();
+
+    String getValues(Object thingToInsert);
 }
